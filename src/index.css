@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+/*
+ * Design tokens copied verbatim from the approved visual prototype:
+ * Abrir-protótipo-interativo-—-Dashboard-Escala-ICI-v2.html ("Órbita de Turnos").
+ * Do not adjust these values without re-approval — see docs/design/DESIGN-SYSTEM-ORBITA.md.
+ * Tailwind v4's `@theme` block compiles every entry below into a real CSS
+ * custom property on `:root` (e.g. `--color-orbita-blue`), so this doubles
+ * as both the Tailwind utility source AND the centralized token sheet.
+ */
+@theme {
+  /* Surfaces */
+  --color-orbita-bg: #060b18;
+  --color-orbita-surface: #0b1728;
+  --color-orbita-card: #0e2035;
+  --color-orbita-elevated: #122844;
+  --color-orbita-border: #1d4778;
+
+  /* Action / brand */
+  --color-orbita-blue: #3b82f6;
+  --color-orbita-blue-dark: #2563eb;
+  --color-orbita-blue-darker: #1d4ed8;
+  --color-orbita-violet: #8b5cf6;
+  --color-orbita-violet-dark: #6d28d9;
+
+  /* Semantic states */
+  --color-orbita-success: #18b884;
+  --color-orbita-warning: #f5b82e;
+  --color-orbita-danger: #ef4444;
+
+  /* Text */
+  --color-orbita-text: #f8fafc;
+  --color-orbita-text-muted: #a9b6c8;
+  --color-orbita-text-faint: #718096;
+
+  /* Shift colors (grid) */
+  --color-shift-madrugada: #6d5ce7;
+  --color-shift-manha: #ffd21c;
+  --color-shift-tarde: #ff7a1a;
+  --color-shift-noite: #2563eb;
+  --color-shift-folga: #22c55e;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Radii — observed cluster in the prototype: 16–24px sections, pill badges/chips */
+  --radius-control: 0.625rem; /* 10px — buttons, inputs */
+  --radius-card-sm: 1rem; /* 16px — nested/team cards */
+  --radius-card: 1.25rem; /* 20px — page-level section cards */
+  --radius-pill: 9999px; /* badges, shift chips, avatars */
+
+  /* Control sizing */
+  --size-control-height: 2.5rem; /* 40px — buttons, inputs */
+  --size-control-height-sm: 2rem; /* 32px — icon buttons, chips */
+  --size-icon-sm: 1rem; /* 16px */
+  --size-icon-md: 1.25rem; /* 20px */
+
+  /* Elevation — the prototype is almost entirely flat (border-based depth per
+     ideas.md's "layered dark surfaces"); shadows are reserved for floating
+     overlays that sit above the flow (menus, dialogs, drawers, toasts). */
+  --shadow-overlay: 0 20px 25px -5px rgb(0 0 0 / 0.35), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+
+  /* Motion — per ideas.md's animation section */
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 240ms;
+}
+
+/* Interaction-state tokens that aren't part of Tailwind's color/spacing scales
+   but are still shared, named values every interactive component consumes. */
+:root {
+  --focus-ring-color: var(--color-orbita-blue);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --disabled-opacity: 0.4;
+}
+
+* {
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--color-orbita-bg);
+  color: var(--color-orbita-text);
+}
+
+/* Shared focus-visible treatment — every Design System component that can
+   receive keyboard focus relies on this class instead of a bespoke ring. */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-orbita-border);
+  border-radius: 999px;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
