@@ -85,18 +85,20 @@ Unificado em `src/components/OrbitBrand.tsx`, com `variant`:
 
 | Variant | Composição | Onde |
 |---|---|---|
-| `login` (padrão) | Quadrado com gradiente `orbita-blue → orbita-violet-dark` + texto `ICI`, ao lado do wordmark `ESCALA ICI` | `LoginHeader` (`/login`) e `Header` (páginas internas: Setores/Equipes/Escalas) |
-| `sidebar` | Ícone Órbita (`public/favicon.svg`) num container arredondado + texto `Escala` + `AppBadge` `ICI` | `OrbitSidebar` |
-| `compact` | Só o ícone Órbita, sem texto | Reservado para contextos de espaço reduzido (nenhum uso real ainda) |
+| `login` (padrão) | Ícone da marca oficial num container arredondado, ao lado do wordmark `ESCALA ICI` | `LoginHeader` (`/login`) e `Header` (páginas internas: Setores/Equipes/Escalas) |
+| `sidebar` | Ícone da marca oficial num container arredondado + texto `Escala` + `AppBadge` `ICI` | `OrbitSidebar` |
+| `compact` | Só o ícone da marca oficial, sem texto | Reservado para contextos de espaço reduzido (nenhum uso real ainda) |
 
-**Por que `login` não usa o asset Órbita (`favicon.svg`)**: a tela de login e
-o `Header` já estavam aprovados visualmente antes deste refactor, e trocar o
-quadrado-lettermark pelo ícone swoosh mudaria a aparência aprovada — o que
-foi explicitamente vetado. A unificação aqui é **estrutural** (uma única
-fonte de implementação, um único componente importado em todo lugar), não
-uma unificação forçada de todo pixel renderizado. `sidebar` e `compact` já
-usam o mesmo asset (`ORBITA_MARK_SRC`, exportado do próprio módulo) — ver
-`OrbitBrand.test.tsx`, que trava isso.
+**Asset oficial**: `public/orbita-mark.webp` — arquivo de marca fornecido
+pelo usuário (fonte: `escala-ici-mark_f99b5596.webp`), com canal alfa real
+(fundo transparente, confirmado via inspeção do canal alpha). Substituiu o
+antigo `public/favicon.svg` (um swoosh placeholder diferente, usado apenas
+como ícone da aba do navegador até então) e o antigo quadrado-lettermark
+`ICI` que o `login` usava antes deste ajuste. Todas as três variantes
+consomem o mesmo `ORBITA_MARK_SRC` exportado por `OrbitBrand.tsx` — nunca um
+segundo asset divergente — ver `OrbitBrand.test.tsx`, que trava isso. O
+favicon da aba (`index.html`) também usa este asset (`public/favicon.png`,
+gerado a partir do `.webp` original em 512×512).
 
 ## Componentes de navegação/overlay (`src/components/`)
 

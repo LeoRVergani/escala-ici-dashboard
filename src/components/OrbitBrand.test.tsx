@@ -2,11 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { OrbitBrand, ORBITA_MARK_SRC } from './OrbitBrand';
 
-describe('OrbitBrand (scenario: marca única, sem implementações independentes por tela)', () => {
-  it('defaults to the login variant — the ICI lettermark square + full wordmark', () => {
-    render(<OrbitBrand />);
-    expect(screen.getByText('ICI')).toBeInTheDocument();
+describe('OrbitBrand (scenario: marca única e oficial, sem implementações independentes por tela)', () => {
+  it('defaults to the login variant — the official mark icon + full wordmark', () => {
+    const { container } = render(<OrbitBrand />);
     expect(screen.getByText('ESCALA ICI')).toBeInTheDocument();
+    const img = container.querySelector('img');
+    expect(img).toHaveAttribute('src', ORBITA_MARK_SRC);
   });
 
   it('renders the sidebar variant — mark icon + "Escala" + "ICI" badge, from the same asset', () => {
@@ -24,16 +25,15 @@ describe('OrbitBrand (scenario: marca única, sem implementações independentes
     expect(screen.queryByText('Escala')).not.toBeInTheDocument();
   });
 
-  it('sidebar and compact variants point at the exact same mark source — never a second, diverging asset', () => {
-    const sidebar = render(<OrbitBrand variant="sidebar" />);
-    const sidebarSrc = sidebar.container.querySelector('img')?.getAttribute('src');
-    sidebar.unmount();
+  it('every variant points at the exact same official mark source — never a second, diverging asset', () => {
+    const variants = ['login', 'sidebar', 'compact'] as const;
+    const sources = variants.map((variant) => {
+      const rendered = render(<OrbitBrand variant={variant} />);
+      const src = rendered.container.querySelector('img')?.getAttribute('src');
+      rendered.unmount();
+      return src;
+    });
 
-    const compact = render(<OrbitBrand variant="compact" />);
-    const compactSrc = compact.container.querySelector('img')?.getAttribute('src');
-
-    expect(sidebarSrc).toBe(ORBITA_MARK_SRC);
-    expect(compactSrc).toBe(ORBITA_MARK_SRC);
-    expect(sidebarSrc).toBe(compactSrc);
+    expect(sources.every((src) => src === ORBITA_MARK_SRC)).toBe(true);
   });
 });
