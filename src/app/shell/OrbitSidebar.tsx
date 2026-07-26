@@ -1,7 +1,7 @@
 import { Link } from 'wouter';
 import { useToast } from '@/components/AppToast';
+import { OrbitBrand } from '@/components/OrbitBrand';
 import { Icon } from '@/design-system/icons';
-import { OrbitBrandMark } from './OrbitBrandMark';
 import { ProtectedEnvironmentCard } from './ProtectedEnvironmentCard';
 
 interface NavItem {
@@ -34,7 +34,7 @@ export function OrbitSidebar({ activeKey, onNavigate }: OrbitSidebarProps) {
     >
       <div>
         <div className="px-2 pt-2 pb-4">
-          <OrbitBrandMark />
+          <OrbitBrand variant="sidebar" />
         </div>
         <nav className="mt-2 flex flex-col gap-1">
           {NAV_ITEMS.map((item) => {

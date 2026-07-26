@@ -64,6 +64,7 @@ Tailwind *e* como tokens CSS centralizados:
 
 | Componente | Uso real no app |
 |---|---|
+| `OrbitBrand` | Marca única do app — ver seção dedicada abaixo |
 | `AppButton` | Toda ação primária/secundária/publicar em todas as páginas |
 | `AppIconButton` | Sino de notificações, desfazer/refazer |
 | `AppInput` | Formulário de adicionar colaborador |
@@ -72,6 +73,30 @@ Tailwind *e* como tokens CSS centralizados:
 | `AppCard` | Cards de setor/equipe/escala em todas as páginas |
 | `AppBadge` | Publicado/Rascunho/Sem escala/Validado |
 | `AppAlert` | Erros/avisos de validação, erros de importação |
+
+### `OrbitBrand` — marca única, sem implementações independentes por tela
+
+Até o checkpoint 1B, a marca tinha **duas implementações independentes**:
+`Brand.tsx` (usado em `/login` e no `Header` das páginas internas) e
+`OrbitBrandMark.tsx` (usado só na `OrbitSidebar`). Isso violava o próprio
+princípio deste documento — "as páginas não montam... manualmente, todas
+consomem os componentes abaixo" — aplicado à identidade visual em si.
+Unificado em `src/components/OrbitBrand.tsx`, com `variant`:
+
+| Variant | Composição | Onde |
+|---|---|---|
+| `login` (padrão) | Quadrado com gradiente `orbita-blue → orbita-violet-dark` + texto `ICI`, ao lado do wordmark `ESCALA ICI` | `LoginHeader` (`/login`) e `Header` (páginas internas: Setores/Equipes/Escalas) |
+| `sidebar` | Ícone Órbita (`public/favicon.svg`) num container arredondado + texto `Escala` + `AppBadge` `ICI` | `OrbitSidebar` |
+| `compact` | Só o ícone Órbita, sem texto | Reservado para contextos de espaço reduzido (nenhum uso real ainda) |
+
+**Por que `login` não usa o asset Órbita (`favicon.svg`)**: a tela de login e
+o `Header` já estavam aprovados visualmente antes deste refactor, e trocar o
+quadrado-lettermark pelo ícone swoosh mudaria a aparência aprovada — o que
+foi explicitamente vetado. A unificação aqui é **estrutural** (uma única
+fonte de implementação, um único componente importado em todo lugar), não
+uma unificação forçada de todo pixel renderizado. `sidebar` e `compact` já
+usam o mesmo asset (`ORBITA_MARK_SRC`, exportado do próprio módulo) — ver
+`OrbitBrand.test.tsx`, que trava isso.
 
 ## Componentes de navegação/overlay (`src/components/`)
 
