@@ -65,6 +65,14 @@
   --duration-fast: 120ms;
   --duration-base: 180ms;
   --duration-slow: 240ms;
+
+  /* Organizations panel layout (checkpoint 1B visual ajuste) — measured off the
+     Manus reference screenshot; see docs/design/DESIGN-TOKENS.md. */
+  --width-sidebar: 16rem; /* 256px */
+  --width-main-content: 82.5rem; /* 1320px — desktop content cap, aligned with topbar padding */
+  --width-summary-column: 25rem; /* 400px — organization summary card column */
+  --size-decorative-number: 2.75rem; /* 44px — big translucent index digit (01) */
+  --size-list-item-min-height: 5rem; /* 80px — horizontal organization/list rows */
 }
 
 /* Interaction-state tokens that aren't part of Tailwind's color/spacing scales

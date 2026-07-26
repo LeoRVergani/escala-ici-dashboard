@@ -80,7 +80,7 @@ export function OrganizationsPage() {
             authorizedTeamsCount: authorizedTeamIds.length,
             draftsCount,
             lastActivityLabel: activityTimestamps.length
-              ? `Atualizado ${formatDateTime(activityTimestamps.sort().at(-1)!)}`
+              ? formatDateTime(activityTimestamps.sort().at(-1)!)
               : 'Sem atividade recente',
           };
         }),
@@ -93,18 +93,18 @@ export function OrganizationsPage() {
 
   return (
     <OrbitAppShell activeNavKey="organizacoes" contextLabel="Todas as organizações autorizadas">
-      <div className="mx-auto max-w-5xl px-6 py-10">
+      <div className="w-full max-w-[var(--width-main-content)] px-4 py-10 sm:px-6 lg:px-10">
         <AppPageHeader
           eyebrow="Minhas organizações"
+          eyebrowTone="accent"
+          size="lg"
           title={`Olá, ${user?.name ?? ''}`}
           subtitle="Escolha a organização que deseja acessar."
+          metadata={rows && <OrganizationCountBadge count={rows.length} />}
           action={
-            <div className="flex flex-col items-end gap-2">
-              {rows && <OrganizationCountBadge count={rows.length} />}
-              <AppButton variant="primary" onClick={() => setCreateDialogOpen(true)}>
-                Criar organização
-              </AppButton>
-            </div>
+            <AppButton variant="primary" onClick={() => setCreateDialogOpen(true)}>
+              Criar organização
+            </AppButton>
           }
         />
 
@@ -119,7 +119,7 @@ export function OrganizationsPage() {
         )}
 
         {rows && rows.length > 0 && (
-          <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+          <div className="mt-6 grid gap-6 lg:grid-cols-[var(--width-summary-column)_minmax(0,1fr)]">
             <OrganizationSummaryCard
               organization={rows[0].organization}
               index={0}

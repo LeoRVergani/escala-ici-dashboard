@@ -85,3 +85,18 @@ Manus for encontrado depois, esta seção deve ser atualizada com os valores rea
 Novo token adicionado para esta tela: `--size-control-height-lg: 3rem` (48px)
 — altura do CTA "Entrar com Microsoft", maior que o controle padrão (40px)
 por ser o call-to-action principal da página.
+
+## Nota — layout do painel `/organizacoes` (checkpoint 1B)
+
+Mesma situação do `/login`: a composição de referência (sidebar + topbar +
+cartão-resumo + lista larga) veio do mesmo mockup Manus, sem HTML/CSS
+disponível — os valores abaixo foram medidos por inspeção visual do
+screenshot, não são pixel-exatos.
+
+| Token | Valor | Uso |
+|---|---|---|
+| `--width-sidebar` | `16rem` (256px) | Largura da `OrbitSidebar` |
+| `--width-main-content` | `82.5rem` (1320px) | Largura máxima da área de conteúdo principal (evita esticar demais em telas ultrawide, mas não centraliza — o conteúdo começa logo após a sidebar) |
+| `--width-summary-column` | `25rem` (400px) | Largura fixa da coluna do `OrganizationSummaryCard`; a coluna de lista ocupa o restante (`minmax(0,1fr)`) |
+| `--size-decorative-number` | `2.75rem` (44px) | Tamanho do dígito decorativo (`01`) no canto do cartão-resumo |
+| `--size-list-item-min-height` | `5rem` (80px) | Altura mínima das linhas horizontais (`OrganizationListItem`) |

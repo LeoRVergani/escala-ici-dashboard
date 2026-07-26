@@ -21,6 +21,9 @@ export const Icon = {
   flask: '⚗',
   arrowRight: '→',
   menu: '☰',
+  building: '🏢',
+  exchange: '⇄',
+  settings: '⚙',
 } as const;
 
 export type IconName = keyof typeof Icon;

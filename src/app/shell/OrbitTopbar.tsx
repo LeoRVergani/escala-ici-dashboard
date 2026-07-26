@@ -1,6 +1,7 @@
 import { AppIconButton } from '@/components/AppIconButton';
 import { Icon } from '@/design-system/icons';
 import { AuthenticatedUserMenu } from './AuthenticatedUserMenu';
+import { CurrentContextCard } from './CurrentContextCard';
 
 interface OrbitTopbarProps {
   contextLabel: string;
@@ -9,22 +10,19 @@ interface OrbitTopbarProps {
 
 export function OrbitTopbar({ contextLabel, onOpenMobileNav }: OrbitTopbarProps) {
   return (
-    <header className="flex items-center justify-between gap-3 border-b border-orbita-border/60 bg-orbita-bg px-4 py-3 sm:px-6">
+    <header className="flex items-center justify-between gap-3 border-b border-orbita-border/60 bg-orbita-bg px-4 py-3 sm:px-6 lg:px-10">
       <div className="flex min-w-0 items-center gap-3">
         <AppIconButton label="Abrir menu de navegação" className="lg:hidden" onClick={onOpenMobileNav}>
           {Icon.menu}
         </AppIconButton>
-        <div className="min-w-0">
-          <p className="text-[10px] font-semibold tracking-widest text-orbita-text-faint uppercase">Contexto atual</p>
-          <p className="truncate text-[13px] font-medium text-white">{contextLabel}</p>
-          <div
-            aria-hidden="true"
-            className="mt-1 h-1 w-32 rounded-[var(--radius-pill)] bg-gradient-to-r from-orbita-blue via-orbita-warning to-orbita-success"
-          />
-        </div>
+        <CurrentContextCard label="Contexto atual" value={contextLabel} />
       </div>
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-        <AppIconButton label="Notificações">{Icon.bell}</AppIconButton>
+        <span className="relative">
+          <AppIconButton label="Notificações">{Icon.bell}</AppIconButton>
+          <span aria-hidden="true" className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-orbita-danger" />
+        </span>
+        <span aria-hidden="true" className="hidden h-8 w-px bg-orbita-border/60 sm:block" />
         <AuthenticatedUserMenu />
       </div>
     </header>

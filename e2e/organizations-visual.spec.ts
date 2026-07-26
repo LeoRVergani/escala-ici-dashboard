@@ -7,7 +7,7 @@ const OUT_DIR = path.join(
   '..',
   '..',
   'escala-ici-dashboard-visual-review',
-  'organizations-rework',
+  'organizations-rework-v2',
 );
 
 const SIZES = [
