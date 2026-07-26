@@ -4,6 +4,7 @@ import type { Member } from '@/domain/member';
 import { createId } from '@/domain/ids';
 import type { OrganizationRepository } from '@/services/OrganizationRepository';
 import { currentMonthPeriod, datesInPeriod } from '@/lib/period';
+import { fold } from '@/lib/parser/normalize';
 
 interface ConvertContext {
   sectorId: string;
@@ -81,6 +82,24 @@ export async function convertParsedScheduleToDraft(
         note: cell.text,
       });
     }
+  }
+
+  // On-call imports (Relatório Plantão COSI) never populate state.cells — every
+  // record lives in state.onCallRecords instead, matched to a technician by
+  // name (buildOnCall never links them by id; see src/lib/parser/parser.ts).
+  // Without this, an on-call import silently produced Members with zero
+  // Assignments — the schedule data was parsed correctly but discarded here.
+  for (const record of state.onCallRecords ?? []) {
+    const technician = state.technicians.find((t) => fold(t.name ?? '') === fold(record.technician));
+    const memberId = technician && memberIdByTechId.get(technician.id);
+    if (!memberId) continue;
+    schedule.assignments.push({
+      scheduleId: schedule.id,
+      memberId,
+      date: record.start.slice(0, 10),
+      shiftCode: 'plantao',
+      note: `${record.start.slice(11, 16)}–${record.end.slice(11, 16)}`,
+    });
   }
 
   return schedule;

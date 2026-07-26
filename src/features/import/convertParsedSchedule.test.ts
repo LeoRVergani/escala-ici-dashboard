@@ -71,6 +71,59 @@ describe('convertParsedScheduleToDraft (scenarios: colaboradores/atribuições e
     );
   });
 
+  // Parser parity (checkpoint 1C, PARTE 2): buildOnCall (src/lib/parser/parser.ts) puts
+  // every on-call record in state.onCallRecords with state.cells left empty — before this
+  // fix, importing a "Relatório Plantão COSI" file silently produced Members with zero
+  // Assignments even though the parser itself had extracted the real coverage data.
+  it('converts on-call records (Plantão COSI) into plantao Assignments, matched to technicians by name', async () => {
+    const organizationRepository = new LocalOrganizationRepository();
+    const state: ScheduleState = {
+      monthKey: { year: 2026, month: 7 },
+      technicians: [{ id: 't1', name: 'João Silva' }],
+      cells: {},
+      dates: ['2026-07-01', '2026-07-02'],
+      viewType: 'oncall',
+      onCallRecords: [
+        { id: 'plantao-1', technician: 'João Silva', start: '2026-07-01T19:00', end: '2026-07-02T07:00', durationMinutes: 720 },
+      ],
+    };
+
+    const schedule = await convertParsedScheduleToDraft(
+      state,
+      { sectorId: SEED_SECTOR_COSI_ID, teamId: SEED_TEAM_SOC_ID },
+      organizationRepository,
+    );
+
+    const members = await organizationRepository.listMembersByTeam(SEED_TEAM_SOC_ID);
+    const joao = members.find((m) => m.name === 'João Silva')!;
+    expect(joao).toBeDefined();
+    expect(schedule.assignments).toContainEqual(
+      expect.objectContaining({ memberId: joao.id, date: '2026-07-01', shiftCode: 'plantao', note: '19:00–07:00' }),
+    );
+  });
+
+  it('ignores an on-call record whose technician name matches nobody in state.technicians', async () => {
+    const organizationRepository = new LocalOrganizationRepository();
+    const state: ScheduleState = {
+      monthKey: { year: 2026, month: 7 },
+      technicians: [],
+      cells: {},
+      dates: ['2026-07-01', '2026-07-02'],
+      viewType: 'oncall',
+      onCallRecords: [
+        { id: 'plantao-1', technician: 'Ninguém Cadastrado', start: '2026-07-01T19:00', end: '2026-07-02T07:00', durationMinutes: 720 },
+      ],
+    };
+
+    const schedule = await convertParsedScheduleToDraft(
+      state,
+      { sectorId: SEED_SECTOR_COSI_ID, teamId: SEED_TEAM_SOC_ID },
+      organizationRepository,
+    );
+
+    expect(schedule.assignments).toHaveLength(0);
+  });
+
   it('builds a DRAFT schedule tied to the given sector and team', async () => {
     const organizationRepository = new LocalOrganizationRepository();
     const schedule = await convertParsedScheduleToDraft(
