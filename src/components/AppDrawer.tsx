@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useFocusTrap } from '@/design-system/useFocusTrap';
+import { AppIcon } from './AppIcon';
 
 export interface AppDrawerProps {
   open: boolean;
@@ -52,7 +53,7 @@ export function AppDrawer({ open, onClose, title, children, side = 'right' }: Ap
             onClick={onClose}
             className="focus-ring grid h-7 w-7 place-items-center rounded-[var(--radius-pill)] text-orbita-text-muted hover:bg-orbita-elevated hover:text-white"
           >
-            ✕
+            <AppIcon name="close" size={16} decorative />
           </button>
         </div>
         <div className="mt-3">{children}</div>

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { AppIcon } from './AppIcon';
 
 interface AppEmptyStateProps {
   title: string;
@@ -10,8 +11,8 @@ interface AppEmptyStateProps {
 export function AppEmptyState({ title, description, action }: AppEmptyStateProps) {
   return (
     <div className="rounded-[var(--radius-card)] border border-orbita-border/60 bg-orbita-card p-10 text-center">
-      <div className="mx-auto grid h-10 w-10 place-items-center rounded-[var(--radius-pill)] bg-orbita-elevated text-orbita-text-muted" aria-hidden="true">
-        ∅
+      <div className="mx-auto grid h-10 w-10 place-items-center rounded-[var(--radius-pill)] bg-orbita-elevated text-orbita-text-muted">
+        <AppIcon name="empty" size={20} decorative />
       </div>
       <p className="mt-4 text-[14px] font-medium text-white">{title}</p>
       {description && <p className="mt-1 text-[13px] text-orbita-text-muted">{description}</p>}

@@ -7,7 +7,7 @@ import { AppDialog } from '@/components/AppDialog';
 import { AppDrawer } from '@/components/AppDrawer';
 import { AppInput } from '@/components/AppInput';
 import { AppBadge } from '@/components/AppBadge';
-import { Icon } from '@/design-system/icons';
+import { AppIcon } from '@/components/AppIcon';
 
 interface ScheduleToolbarProps {
   canUndo: boolean;
@@ -53,12 +53,12 @@ export function ScheduleToolbar({
       <div className="flex items-center gap-2">
         <AppTooltip label="Desfazer">
           <AppIconButton label="Desfazer" variant="bordered" disabled={!canUndo} onClick={onUndo}>
-            {Icon.undo}
+            <AppIcon name="undo" decorative />
           </AppIconButton>
         </AppTooltip>
         <AppTooltip label="Refazer">
           <AppIconButton label="Refazer" variant="bordered" disabled={!canRedo} onClick={onRedo}>
-            {Icon.redo}
+            <AppIcon name="redo" decorative />
           </AppIconButton>
         </AppTooltip>
         <AppButton variant="secondary" onClick={onSave}>
@@ -68,13 +68,13 @@ export function ScheduleToolbar({
       <div className="flex items-center gap-2">
         {alertCount > 0 && (
           <AppBadge tone="warning">
-            {Icon.warning} {alertCount} {alertCount === 1 ? 'alerta' : 'alertas'}
+            <AppIcon name="warning" size={14} tone="warning" /> {alertCount} {alertCount === 1 ? 'alerta' : 'alertas'}
           </AppBadge>
         )}
         <AppDropdownMenu
           trigger={(triggerProps) => (
-            <AppButton variant="secondary" {...triggerProps}>
-              Mais ações {Icon.chevronDown}
+            <AppButton variant="secondary" {...triggerProps} className="flex items-center gap-1.5">
+              Mais ações <AppIcon name="chevronDown" size={14} decorative />
             </AppButton>
           )}
         >

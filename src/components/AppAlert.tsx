@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { AppIcon, type AppIconName, type AppIconTone } from './AppIcon';
 
 type AppAlertTone = 'error' | 'warning' | 'success' | 'info';
 
@@ -14,11 +15,18 @@ const TONE_CLASSES: Record<AppAlertTone, string> = {
   info: 'border-orbita-border bg-orbita-elevated text-orbita-text-muted',
 };
 
-const TONE_ICON: Record<AppAlertTone, string> = {
-  error: '✕',
-  warning: '⚠',
-  success: '✓',
-  info: 'ℹ',
+const TONE_ICON: Record<AppAlertTone, AppIconName> = {
+  error: 'error',
+  warning: 'warning',
+  success: 'checkCircle',
+  info: 'info',
+};
+
+const TONE_ICON_TONE: Record<AppAlertTone, AppIconTone> = {
+  error: 'danger',
+  warning: 'warning',
+  success: 'success',
+  info: 'muted',
 };
 
 const TONE_ROLE: Record<AppAlertTone, 'alert' | 'status'> = {
@@ -31,8 +39,12 @@ const TONE_ROLE: Record<AppAlertTone, 'alert' | 'status'> = {
 /** Inline banner for validation errors/warnings/success/info — used in the review screen and the import dropzone. */
 export function AppAlert({ tone, children }: AppAlertProps) {
   return (
-    <div role={TONE_ROLE[tone]} className={`rounded-[var(--radius-control)] border px-3 py-2 text-[13px] ${TONE_CLASSES[tone]}`}>
-      <span aria-hidden="true">{TONE_ICON[tone]}</span> {children}
+    <div
+      role={TONE_ROLE[tone]}
+      className={`flex items-start gap-2 rounded-[var(--radius-control)] border px-3 py-2 text-[13px] ${TONE_CLASSES[tone]}`}
+    >
+      <AppIcon name={TONE_ICON[tone]} size={16} tone={TONE_ICON_TONE[tone]} className="mt-0.5" />
+      <span>{children}</span>
     </div>
   );
 }

@@ -1,22 +1,22 @@
 import { Link } from 'wouter';
 import { useToast } from '@/components/AppToast';
 import { OrbitBrand } from '@/components/OrbitBrand';
-import { Icon } from '@/design-system/icons';
+import { AppIcon, type AppIconName } from '@/components/AppIcon';
 import { ProtectedEnvironmentCard } from './ProtectedEnvironmentCard';
 
 interface NavItem {
   key: string;
   label: string;
-  icon: string;
+  icon: AppIconName;
   href?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { key: 'organizacoes', label: 'Minhas organizações', href: '/organizacoes', icon: Icon.building },
-  { key: 'escalas', label: 'Escalas', icon: Icon.calendar },
-  { key: 'trocas', label: 'Solicitações de troca', icon: Icon.exchange },
-  { key: 'historico', label: 'Histórico', icon: Icon.clock },
-  { key: 'configuracoes', label: 'Configurações', icon: Icon.settings },
+  { key: 'organizacoes', label: 'Minhas organizações', href: '/organizacoes', icon: 'organizations' },
+  { key: 'escalas', label: 'Escalas', icon: 'schedules' },
+  { key: 'trocas', label: 'Solicitações de troca', icon: 'exchange' },
+  { key: 'historico', label: 'Histórico', icon: 'history' },
+  { key: 'configuracoes', label: 'Configurações', icon: 'settings' },
 ];
 
 interface OrbitSidebarProps {
@@ -39,11 +39,7 @@ export function OrbitSidebar({ activeKey, onNavigate }: OrbitSidebarProps) {
         <nav className="mt-2 flex flex-col gap-1">
           {NAV_ITEMS.map((item) => {
             const isActive = item.key === activeKey;
-            const iconSpan = (
-              <span aria-hidden="true" className={isActive ? 'text-orbita-blue' : 'text-orbita-text-faint'}>
-                {item.icon}
-              </span>
-            );
+            const iconEl = <AppIcon name={item.icon} tone={isActive ? 'active' : 'muted'} />;
             if (!item.href) {
               return (
                 <button
@@ -52,7 +48,7 @@ export function OrbitSidebar({ activeKey, onNavigate }: OrbitSidebarProps) {
                   className="focus-ring flex items-center gap-2.5 rounded-[var(--radius-control)] border-l-2 border-transparent px-3 py-2 text-left text-[13px] text-orbita-text-muted transition hover:bg-orbita-elevated hover:text-white"
                   onClick={() => show('Funcionalidade disponível em um próximo checkpoint', 'info')}
                 >
-                  {iconSpan}
+                  {iconEl}
                   {item.label}
                 </button>
               );
@@ -69,7 +65,7 @@ export function OrbitSidebar({ activeKey, onNavigate }: OrbitSidebarProps) {
                     : 'border-transparent text-orbita-text-muted hover:bg-orbita-elevated hover:text-white'
                 }`}
               >
-                {iconSpan}
+                {iconEl}
                 {item.label}
               </Link>
             );

@@ -1,4 +1,5 @@
 import { AppCard } from '@/components/AppCard';
+import { AppIcon } from '@/components/AppIcon';
 import type { Organization } from '@/domain/organization';
 
 interface OrganizationSummaryCardProps {
@@ -40,20 +41,29 @@ export function OrganizationSummaryCard({
       </p>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        <div className="rounded-[var(--radius-control)] border border-orbita-border/60 bg-orbita-elevated px-4 py-3">
-          <p className="text-[22px] font-bold text-white">{String(sectorsTotal).padStart(2, '0')}</p>
-          <p className="text-[11px] text-orbita-text-muted">setores cadastrados</p>
+        <div className="flex items-start gap-2 rounded-[var(--radius-control)] border border-orbita-border/60 bg-orbita-elevated px-4 py-3">
+          <AppIcon name="building" size={16} tone="muted" className="mt-1" />
+          <div>
+            <p className="text-[22px] font-bold text-white">{String(sectorsTotal).padStart(2, '0')}</p>
+            <p className="text-[11px] text-orbita-text-muted">setores cadastrados</p>
+          </div>
         </div>
-        <div className="rounded-[var(--radius-control)] border border-orbita-border/60 bg-orbita-elevated px-4 py-3">
-          <p className="text-[22px] font-bold text-white">{authorizedTeamsCount}</p>
-          <p className="text-[11px] text-orbita-text-muted">equipes autorizadas</p>
+        <div className="flex items-start gap-2 rounded-[var(--radius-control)] border border-orbita-border/60 bg-orbita-elevated px-4 py-3">
+          <AppIcon name="users" size={16} tone="muted" className="mt-1" />
+          <div>
+            <p className="text-[22px] font-bold text-white">{authorizedTeamsCount}</p>
+            <p className="text-[11px] text-orbita-text-muted">equipes autorizadas</p>
+          </div>
         </div>
         {draftsCount > 0 && (
-          <div className="rounded-[var(--radius-control)] border border-orbita-warning/40 bg-orbita-warning/10 px-4 py-3">
-            <p className="text-[22px] font-bold text-orbita-warning">{draftsCount}</p>
-            <p className="text-[11px] text-orbita-warning/80">
-              rascunho{draftsCount > 1 ? 's' : ''} ativo{draftsCount > 1 ? 's' : ''}
-            </p>
+          <div className="flex items-start gap-2 rounded-[var(--radius-control)] border border-orbita-warning/40 bg-orbita-warning/10 px-4 py-3">
+            <AppIcon name="warning" size={16} tone="warning" className="mt-1" />
+            <div>
+              <p className="text-[22px] font-bold text-orbita-warning">{draftsCount}</p>
+              <p className="text-[11px] text-orbita-warning/80">
+                rascunho{draftsCount > 1 ? 's' : ''} ativo{draftsCount > 1 ? 's' : ''}
+              </p>
+            </div>
           </div>
         )}
       </div>

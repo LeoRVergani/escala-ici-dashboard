@@ -7,6 +7,7 @@ import { AppButton } from '@/components/AppButton';
 import { AppEmptyState } from '@/components/AppEmptyState';
 import { AppConfirm } from '@/components/AppConfirm';
 import { AppAlert } from '@/components/AppAlert';
+import { AppIcon } from '@/components/AppIcon';
 import { AppBreadcrumb } from '@/components/AppBreadcrumb';
 import { useToast } from '@/components/AppToast';
 import { useOrganizationRepository, useScheduleRepository } from '@/app/services';
@@ -323,8 +324,8 @@ function ScheduleEditorLoaded({
 
         {step === 'success' && (
           <div className="mx-auto max-w-lg text-center">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-[var(--radius-pill)] bg-orbita-success/10 text-[24px] text-orbita-success">
-              ✓
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-[var(--radius-pill)] bg-orbita-success/10">
+              <AppIcon name="checkCircle" size={24} tone="success" decorative />
             </div>
             <h1 className="mt-4 text-[20px] font-bold text-white">Escala {team.name} publicada</h1>
             <p className="mt-2 text-[13px] text-orbita-text-muted">

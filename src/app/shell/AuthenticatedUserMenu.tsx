@@ -6,7 +6,7 @@ import { useAuth } from '@/app/auth';
 import { useOrganizationRepository } from '@/app/services';
 import { DEV_USERS } from '@/services/DevAuthGateway';
 import type { MembershipRole } from '@/domain/membership';
-import { Icon } from '@/design-system/icons';
+import { AppIcon } from '@/components/AppIcon';
 
 const ROLE_LABELS: Record<MembershipRole, string> = {
   ADMIN: 'Administrador',
@@ -51,8 +51,8 @@ export function AuthenticatedUserMenu() {
             <span className="block text-[13px] font-medium text-white">{user.name}</span>
             {roleLabel && <span className="block text-[11px] text-orbita-text-muted">{roleLabel}</span>}
           </span>
-          <span aria-hidden="true" className="hidden text-orbita-text-faint sm:inline">
-            {Icon.chevronDown}
+          <span className="hidden sm:inline">
+            <AppIcon name="chevronDown" tone="muted" size={14} />
           </span>
         </button>
       )}
@@ -60,7 +60,10 @@ export function AuthenticatedUserMenu() {
       <AppDropdownItem onClick={() => show('Funcionalidade disponível em um próximo checkpoint', 'info')}>
         Ver conta local
       </AppDropdownItem>
-      <AppDropdownItem onClick={() => void signOut()}>Sair</AppDropdownItem>
+      <AppDropdownItem onClick={() => void signOut()} className="flex items-center gap-2">
+        <AppIcon name="logout" size={16} tone="muted" />
+        Sair
+      </AppDropdownItem>
       {import.meta.env.DEV && switchDevUser && (
         <>
           <div className="my-1 h-px bg-orbita-border/60" />

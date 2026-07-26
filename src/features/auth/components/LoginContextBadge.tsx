@@ -1,4 +1,4 @@
-import { Icon } from '@/design-system/icons';
+import { AppIcon } from '@/components/AppIcon';
 
 interface LoginContextBadgeProps {
   eyebrow: string;
@@ -14,7 +14,7 @@ export function LoginContextBadge({ eyebrow, value, tone = 'default', className 
     >
       <p className="text-[10px] font-semibold tracking-widest text-orbita-text-faint uppercase">{eyebrow}</p>
       <p className={`text-[13px] font-semibold whitespace-nowrap ${tone === 'success' ? 'text-orbita-success' : 'text-white'}`}>
-        {tone === 'success' && <span aria-hidden="true">{Icon.check} </span>}
+        {tone === 'success' && <AppIcon name="check" size={14} tone="success" className="mr-1 inline-block align-[-2px]" />}
         {value}
       </p>
     </div>

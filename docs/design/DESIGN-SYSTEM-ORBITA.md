@@ -38,9 +38,8 @@ Tailwind *e* como tokens CSS centralizados:
   mouse).
 - Breakpoints: os padrões do Tailwind (`sm`/`md`/`lg`/`xl`), que já é o que o
   protótipo compilado usa (confirmado via grep no CSS gerado).
-- Ícones: `src/design-system/icons.ts` — glifos Unicode/emoji centralizados
-  (o próprio protótipo usa glifos simples, não uma biblioteca de ícones SVG;
-  manter esse padrão evita introduzir um sistema visual novo).
+- Ícones: `src/components/AppIcon.tsx` (checkpoint 1C substituiu os glifos
+  Unicode/emoji por `lucide-react` — ver seção dedicada "Iconografia" abaixo).
 
 ## Acessibilidade (transversal a todos os componentes interativos)
 
@@ -65,6 +64,7 @@ Tailwind *e* como tokens CSS centralizados:
 | Componente | Uso real no app |
 |---|---|
 | `OrbitBrand` | Marca única do app — ver seção dedicada abaixo |
+| `AppIcon` | Único ponto de entrada de ícones — ver seção "Iconografia" abaixo |
 | `AppButton` | Toda ação primária/secundária/publicar em todas as páginas |
 | `AppIconButton` | Sino de notificações, desfazer/refazer |
 | `AppInput` | Formulário de adicionar colaborador |
@@ -99,6 +99,68 @@ consomem o mesmo `ORBITA_MARK_SRC` exportado por `OrbitBrand.tsx` — nunca um
 segundo asset divergente — ver `OrbitBrand.test.tsx`, que trava isso. O
 favicon da aba (`index.html`) também usa este asset (`public/favicon.png`,
 gerado a partir do `.webp` original em 512×512).
+
+### `AppIcon` — conjunto único de ícones, nunca emoji/glifo/import solto
+
+Até o checkpoint 1C, todo ícone da aplicação era um glifo Unicode/emoji
+literal (`🔔`, `📅`, `⚙`, `✓`, `⚠`, `✕`, `◷`, `∅`, `🔍`, `▾`, etc.),
+centralizados em `src/design-system/icons.ts` mas ainda dependentes de fonte
+do sistema operacional — a mesma string renderiza com aparência (e às vezes
+suporte) diferente entre Linux, Windows, navegador e screenshots de teste.
+`icons.ts` foi **removido**; todo ícone agora vem de
+[`lucide-react`](https://lucide.dev) (a mesma biblioteca usada pelo projeto
+de referência visual em `escala-ici-redesign`, que já usa Radix UI + lucide —
+nenhuma segunda biblioteca de ícones foi introduzida), sempre através de
+`src/components/AppIcon.tsx`. Nenhuma página ou componente importa
+`lucide-react` diretamente.
+
+**API**:
+
+```ts
+<AppIcon
+  name="bell"           // AppIconName — um dos ~34 nomes do registro interno
+  size={18}              // 14 | 16 | 18 | 20 | 24 (padrão: 18)
+  tone="muted"            // default | muted | active | success | warning | danger
+  strokeWidth={1.75}      // 1.5 | 1.75 | 2 (padrão: 1.75)
+  decorative              // padrão: true — aria-hidden, some da árvore de acessibilidade
+  label="Notificações"    // obrigatório quando decorative={false}
+  className="..."         // classes extras (nunca cor — ver tons)
+/>
+```
+
+- **Tamanhos**: só os 5 valores de `APP_ICON_SIZES` (14/16/18/20/24) são
+  aceitos pelo tipo `AppIconSize` — não há tamanho arbitrário.
+- **Espessura**: só os 3 valores de `APP_ICON_STROKE_WIDTHS` (1.5/1.75/2) —
+  1.75 é o padrão neutro; 2 fica reservado para ênfase pontual (nunca usado
+  como padrão de uma tela inteira).
+- **Tons**: cada tom mapeia para um token de cor existente
+  (`--color-orbita-*`) — nunca um hex direto. **`default` não aplica nenhuma
+  classe de cor** — o ícone herda `currentColor` do elemento pai. Isso não é
+  um detalhe cosmético: um ícone com tom fixo dentro de um contêiner que já
+  define sua própria cor de texto (ex. a seta no botão branco "Entrar com
+  Microsoft") entra em conflito com esse texto — duas classes Tailwind
+  `text-*` no mesmo elemento são resolvidas pela ordem em que o Tailwind as
+  gera no CSS final, **não** pela ordem dos atributos JSX, então a cor
+  "vencedora" é imprevisível. Deixar `default` sem classe evita o conflito
+  inteiramente, herdando a cor correta do contexto.
+- **Decorativo vs. informativo**: `decorative` (padrão `true`) marca
+  `aria-hidden="true"` — usado sempre que o ícone acompanha um texto visível
+  equivalente. `decorative={false}` marca `role="img"` + `aria-label={label}`
+  — obrigatório em controles somente-ícone que não têm outro nome acessível
+  próprio (ex. `ConflictIndicator`, cujo `aria-label` é o próprio texto do
+  alerta). Em botões-ícone que já recebem `aria-label`/`title` de fora (ex.
+  `AppIconButton label="Notificações"`), o ícone interno permanece
+  `decorative` — o nome acessível já existe no elemento pai, duplicá-lo no
+  SVG seria redundante.
+- **Proibido**: emoji, glifo Unicode solto (✓ ✕ ⚠ ↩ ↪ etc.) ou
+  `import { X } from 'lucide-react'` fora de `AppIcon.tsx`, em qualquer
+  página ou componente. Testes automatizados (`AppIcon.test.tsx` e um guard
+  de todo o `src/`) travam isso — ver seção de testes.
+
+Mapeamento completo de nomes → ícone lucide está em `AppIcon.tsx`
+(`ICONS`); a página de showcase (`/dev/design-system`, seção "Iconografia")
+renderiza o conjunto inteiro, todos os tamanhos e todos os tons — use-a para
+conferir visualmente antes de adicionar um ícone novo.
 
 ## Componentes de navegação/overlay (`src/components/`)
 
@@ -141,3 +203,12 @@ gerado a partir do `.webp` original em 512×512).
   implementada — Tab/Shift+Tab e Escape cobrem o necessário para este
   checkpoint; um padrão de teclado mais completo (setas ↑/↓) fica para um
   checkpoint futuro caso se mostre necessário.
+- Checkpoint 1C (ícones): `ScheduleGrid`/`ScheduleCell`/`CellActionMenu` não
+  ganharam ícones novos para conceitos que a auditoria confirmou não
+  existirem hoje como elemento visual (usuário, observação/comentário, drag
+  handle) — a grade do editor já está aprovada, e inventar posições de ícone
+  novas ali seria alterar seu visual aprovado, não apenas trocar um glifo por
+  um vetor. Só `ConflictIndicator` (que já tinha um `⚠` real) foi migrado.
+  Se um checkpoint futuro adicionar de fato essas informações à grade
+  (autor da observação, alça de arraste visível, etc.), ele deve usar
+  `AppIcon` desde o início.

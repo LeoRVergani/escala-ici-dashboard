@@ -3,7 +3,7 @@ import { AppButton } from '@/components/AppButton';
 import { AppDisclosure } from '@/components/AppDisclosure';
 import { useToast } from '@/components/AppToast';
 import { useAuth } from '@/app/auth';
-import { Icon } from '@/design-system/icons';
+import { AppIcon } from '@/components/AppIcon';
 
 const MICROSOFT_UNAVAILABLE_MESSAGE =
   'A integração Microsoft ainda não está configurada neste ambiente local.';
@@ -45,14 +45,14 @@ export function LoginAccessPanel() {
           <MicrosoftMark />
           Entrar com Microsoft
         </span>
-        <span aria-hidden="true">{Icon.arrowRight}</span>
+        <AppIcon name="arrowRight" size={16} />
       </AppButton>
 
       <div className="mt-4">
         <AppDisclosure
           label={
             <>
-              <span aria-hidden="true">{Icon.flask}</span> Acessar ambiente de teste
+              <AppIcon name="flask" size={14} tone="muted" /> Acessar ambiente de teste
             </>
           }
         >

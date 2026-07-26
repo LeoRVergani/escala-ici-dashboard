@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { AppIcon, type AppIconName, type AppIconTone } from './AppIcon';
 
 type ToastTone = 'success' | 'info' | 'error';
 
@@ -19,6 +20,18 @@ const TONE_CLASSES: Record<ToastTone, string> = {
   success: 'border-orbita-success/40 bg-orbita-card text-orbita-success',
   info: 'border-orbita-border bg-orbita-card text-white',
   error: 'border-orbita-danger/40 bg-orbita-card text-orbita-danger',
+};
+
+const TONE_ICON: Record<ToastTone, AppIconName> = {
+  success: 'checkCircle',
+  info: 'info',
+  error: 'error',
+};
+
+const TONE_ICON_TONE: Record<ToastTone, AppIconTone> = {
+  success: 'success',
+  info: 'muted',
+  error: 'danger',
 };
 
 let idCounter = 0;
@@ -44,9 +57,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <div
               key={toast.id}
               role="status"
-              className={`rounded-[var(--radius-control)] border px-4 py-2.5 text-[13px] shadow-[var(--shadow-overlay)] ${TONE_CLASSES[toast.tone]}`}
+              className={`flex items-start gap-2 rounded-[var(--radius-control)] border px-4 py-2.5 text-[13px] shadow-[var(--shadow-overlay)] ${TONE_CLASSES[toast.tone]}`}
             >
-              {toast.message}
+              <AppIcon name={TONE_ICON[toast.tone]} size={16} tone={TONE_ICON_TONE[toast.tone]} className="mt-0.5" />
+              <span>{toast.message}</span>
             </div>
           ))}
         </div>,

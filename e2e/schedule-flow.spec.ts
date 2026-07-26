@@ -43,7 +43,7 @@ async function openSocSchedulesPage(page: Page) {
 }
 
 async function addMember(page: Page, name: string, login: string) {
-  await page.getByRole('button', { name: 'Mais ações ▾' }).click();
+  await page.getByRole('button', { name: 'Mais ações' }).click();
   await page.getByRole('menuitem', { name: 'Adicionar colaborador' }).click();
   await page.getByLabel('Nome').fill(name);
   await page.getByLabel('Login corporativo').fill(login);

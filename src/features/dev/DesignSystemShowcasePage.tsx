@@ -18,7 +18,12 @@ import { AppConfirm } from '@/components/AppConfirm';
 import { AppDrawer } from '@/components/AppDrawer';
 import { AppDropdownMenu, AppDropdownItem } from '@/components/AppDropdownMenu';
 import { useToast } from '@/components/AppToast';
-import { Icon } from '@/design-system/icons';
+import {
+  AppIcon,
+  APP_ICON_NAMES,
+  APP_ICON_SIZES,
+  type AppIconTone,
+} from '@/components/AppIcon';
 import { ShiftBadge } from '@/features/editor/ShiftBadge';
 import { ConflictIndicator } from '@/features/editor/ConflictIndicator';
 import type { ShiftCode } from '@/domain/schedule';
@@ -36,6 +41,8 @@ const ALL_SHIFTS: ShiftCode[] = [
   'afastamento',
   'custom',
 ];
+
+const ALL_TONES: AppIconTone[] = ['default', 'muted', 'active', 'success', 'warning', 'danger'];
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -78,12 +85,84 @@ export function DesignSystemShowcasePage() {
             </AppButton>
             <AppTooltip label="Ação com dica">
               <AppIconButton label="Ação com dica" variant="bordered">
-                {Icon.undo}
+                <AppIcon name="undo" decorative />
               </AppIconButton>
             </AppTooltip>
             <AppIconButton label="Notificações" variant="ghost">
-              {Icon.bell}
+              <AppIcon name="bell" decorative />
             </AppIconButton>
+          </div>
+        </Section>
+
+        <Section title="Iconografia">
+          <div className="space-y-6">
+            <p className="text-[12px] text-orbita-text-muted">
+              Conjunto único e oficial de ícones — lucide-react, sempre via <code>AppIcon</code>. Nunca emoji, glifo
+              Unicode solto ou um import direto de <code>lucide-react</code> numa página.
+            </p>
+
+            <div>
+              <p className="mb-2 text-[11px] font-semibold tracking-wide text-orbita-text-faint uppercase">
+                Conjunto completo ({APP_ICON_NAMES.length})
+              </p>
+              <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-7">
+                {APP_ICON_NAMES.map((name) => (
+                  <div
+                    key={name}
+                    className="flex flex-col items-center gap-1.5 rounded-[var(--radius-control)] border border-orbita-border/60 bg-orbita-elevated p-3 text-center"
+                  >
+                    <AppIcon name={name} size={20} />
+                    <span className="text-[10px] break-all text-orbita-text-faint">{name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-[11px] font-semibold tracking-wide text-orbita-text-faint uppercase">
+                Tamanhos permitidos
+              </p>
+              <div className="flex flex-wrap items-end gap-5">
+                {APP_ICON_SIZES.map((size) => (
+                  <div key={size} className="flex flex-col items-center gap-1.5">
+                    <AppIcon name="bell" size={size} />
+                    <span className="text-[10px] text-orbita-text-faint">{size}px</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-[11px] font-semibold tracking-wide text-orbita-text-faint uppercase">
+                Tons semânticos
+              </p>
+              <div className="flex flex-wrap items-center gap-5">
+                {ALL_TONES.map((tone) => (
+                  <div key={tone} className="flex flex-col items-center gap-1.5">
+                    <AppIcon name="warning" tone={tone} />
+                    <span className="text-[10px] text-orbita-text-faint">{tone}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-[var(--radius-control)] border border-orbita-success/40 bg-orbita-success/10 p-3">
+                <p className="text-[11px] font-semibold text-orbita-success">Uso correto</p>
+                <p className="mt-1 text-[12px] text-orbita-text-muted">
+                  <AppIcon name="bell" size={14} tone="muted" className="mr-1 inline-block align-[-2px]" />
+                  decorativo ao lado de texto; ou <code>decorative=false label=&quot;...&quot;</code> quando é a
+                  única informação do controle (botão só com ícone).
+                </p>
+              </div>
+              <div className="rounded-[var(--radius-control)] border border-orbita-danger/40 bg-orbita-danger/10 p-3">
+                <p className="text-[11px] font-semibold text-orbita-danger">Uso proibido</p>
+                <p className="mt-1 text-[12px] text-orbita-text-muted">
+                  Emoji (sino, calendário, engrenagem...), glifo Unicode solto (marca de seleção, X, alerta...) ou{' '}
+                  <code>import {'{ Bell }'} from &quot;lucide-react&quot;</code> direto numa página.
+                </p>
+              </div>
+            </div>
           </div>
         </Section>
 
@@ -165,8 +244,8 @@ export function DesignSystemShowcasePage() {
         <Section title="Menu suspenso (AppDropdownMenu)">
           <AppDropdownMenu
             trigger={(triggerProps) => (
-              <AppButton variant="secondary" {...triggerProps}>
-                Mais ações {Icon.chevronDown}
+              <AppButton variant="secondary" {...triggerProps} className="flex items-center gap-1.5">
+                Mais ações <AppIcon name="chevronDown" size={14} decorative />
               </AppButton>
             )}
           >

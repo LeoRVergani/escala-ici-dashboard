@@ -2,8 +2,9 @@ import { Link } from 'wouter';
 import { AppCard } from '@/components/AppCard';
 import { AppBadge } from '@/components/AppBadge';
 import { AppButton } from '@/components/AppButton';
-import { Icon } from '@/design-system/icons';
+import { AppIcon } from '@/components/AppIcon';
 import type { Organization } from '@/domain/organization';
+import type { AppIconName } from '@/components/AppIcon';
 
 interface OrganizationListItemProps {
   organization: Organization;
@@ -12,11 +13,14 @@ interface OrganizationListItemProps {
   lastActivityLabel: string;
 }
 
-function MetricColumn({ label, value }: { label: string; value: string }) {
+function MetricColumn({ icon, label, value }: { icon: AppIconName; label: string; value: string }) {
   return (
-    <div>
-      <p className="text-[10px] font-semibold tracking-widest text-orbita-text-faint uppercase">{label}</p>
-      <p className="mt-0.5 text-[13px] font-medium text-white">{value}</p>
+    <div className="flex items-start gap-2">
+      <AppIcon name={icon} size={16} tone="muted" className="mt-0.5" />
+      <div>
+        <p className="text-[10px] font-semibold tracking-widest text-orbita-text-faint uppercase">{label}</p>
+        <p className="mt-0.5 text-[13px] font-medium text-white">{value}</p>
+      </div>
     </div>
   );
 }
@@ -50,9 +54,9 @@ export function OrganizationListItem({
       </div>
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 lg:flex-1 lg:border-x lg:border-orbita-border/50 lg:px-6">
-        <MetricColumn label="Função" value={roleLabel} />
-        <MetricColumn label="Setores autorizados" value={sectorsLabel} />
-        <MetricColumn label="Última atividade" value={lastActivityLabel} />
+        <MetricColumn icon="users" label="Função" value={roleLabel} />
+        <MetricColumn icon="building" label="Setores autorizados" value={sectorsLabel} />
+        <MetricColumn icon="clock" label="Última atividade" value={lastActivityLabel} />
       </div>
 
       <div className="flex shrink-0 items-center gap-3">
@@ -62,8 +66,8 @@ export function OrganizationListItem({
         {/* Only one organization exists today, so "opening" it means its sectors — the existing /setores route,
             now filtered by the signed-in user's authorization. A future multi-org checkpoint can scope this per-org. */}
         <Link href="/setores">
-          <AppButton variant="secondary">
-            Abrir organização <span aria-hidden="true">{Icon.arrowRight}</span>
+          <AppButton variant="secondary" className="flex items-center gap-1.5">
+            Abrir organização <AppIcon name="arrowRight" size={16} />
           </AppButton>
         </Link>
       </div>

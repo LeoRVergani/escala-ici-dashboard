@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'wouter';
 import { Header } from '@/app/Header';
-import { AppCard } from '@/components/AppCard';
-import { AppBadge } from '@/components/AppBadge';
 import { AppButton } from '@/components/AppButton';
 import { AppPageHeader } from '@/components/AppPageHeader';
 import { AppLoadingState } from '@/components/AppLoadingState';
@@ -14,7 +12,7 @@ import type { Team } from '@/domain/team';
 import type { Schedule } from '@/domain/schedule';
 import type { UserAuthorization } from '@/domain/membership';
 import { isSectorAuthorized, filterAuthorizedTeams } from '@/domain/authorization';
-import { formatPeriod, formatDateTime } from '@/lib/format';
+import { TeamListItem } from './components/TeamListItem';
 
 interface TeamRow {
   team: Team;
@@ -99,35 +97,9 @@ export function TeamsPage() {
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(authorizedRows === null || authorized === undefined) && <AppLoadingState />}
-          {authorizedRows?.map(({ team, published, draft }) => {
-            const active = published ?? draft;
-            return (
-              <AppCard key={team.id} className="p-5" data-team-id={team.id}>
-                <div className="flex items-start justify-between">
-                  <span className="text-[11px] text-orbita-text-faint">
-                    {team.scheduleType === 'PLANTAO_COSI' ? 'Escala de plantão' : 'Escala 6×1'}
-                  </span>
-                  {published && <AppBadge tone="success">Publicado</AppBadge>}
-                  {!published && draft && <AppBadge tone="warning">Rascunho</AppBadge>}
-                  {!published && !draft && <AppBadge tone="neutral">Sem escala</AppBadge>}
-                </div>
-                <h2 className="mt-2 text-[16px] font-semibold text-white">{team.name}</h2>
-                {active ? (
-                  <div className="mt-2 space-y-0.5 text-[12px] text-orbita-text-muted">
-                    <p>Período atual: {formatPeriod(active.periodStart, active.periodEnd)}</p>
-                    <p>Última atualização: {formatDateTime(active.updatedAt)}</p>
-                  </div>
-                ) : (
-                  <p className="mt-2 text-[12px] text-orbita-text-muted">Nenhuma escala criada ainda.</p>
-                )}
-                <Link href={`/equipes/${team.id}/escalas`} className="mt-4 block">
-                  <AppButton variant="secondary" className="w-full">
-                    Abrir equipe
-                  </AppButton>
-                </Link>
-              </AppCard>
-            );
-          })}
+          {authorizedRows?.map(({ team, published, draft }) => (
+            <TeamListItem key={team.id} team={team} published={published} draft={draft} />
+          ))}
         </div>
       </main>
     </div>

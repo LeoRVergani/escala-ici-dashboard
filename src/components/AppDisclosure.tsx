@@ -1,5 +1,5 @@
 import { useId, useRef, useState, type ReactNode } from 'react';
-import { Icon } from '@/design-system/icons';
+import { AppIcon } from './AppIcon';
 
 interface AppDisclosureProps {
   label: ReactNode;
@@ -31,11 +31,8 @@ export function AppDisclosure({ label, children, defaultOpen = false }: AppDiscl
         onClick={() => setOpen((current) => !current)}
       >
         <span className="flex items-center gap-2">{label}</span>
-        <span
-          aria-hidden="true"
-          className={`transition-transform duration-[var(--duration-base)] ${open ? 'rotate-180' : ''}`}
-        >
-          {Icon.chevronDown}
+        <span className={`transition-transform duration-[var(--duration-base)] ${open ? 'rotate-180' : ''}`}>
+          <AppIcon name="chevronDown" size={16} tone="muted" />
         </span>
       </button>
       {open && (

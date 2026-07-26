@@ -3,7 +3,7 @@ import { OrbitBrand } from '@/components/OrbitBrand';
 import { AppIconButton } from '@/components/AppIconButton';
 import { AppDropdownMenu, AppDropdownItem } from '@/components/AppDropdownMenu';
 import { AppBreadcrumb } from '@/components/AppBreadcrumb';
-import { Icon } from '@/design-system/icons';
+import { AppIcon } from '@/components/AppIcon';
 import { useAuth } from './auth';
 
 interface HeaderProps {
@@ -34,7 +34,9 @@ export function Header({ breadcrumb }: HeaderProps) {
       </div>
       {user && (
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <AppIconButton label="Notificações">{Icon.bell}</AppIconButton>
+          <AppIconButton label="Notificações">
+            <AppIcon name="bell" decorative />
+          </AppIconButton>
           <AppDropdownMenu
             trigger={(triggerProps) => (
               <button

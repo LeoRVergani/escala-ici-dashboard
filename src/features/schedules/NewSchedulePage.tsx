@@ -6,7 +6,7 @@ import { AppButton } from '@/components/AppButton';
 import { AppTabs } from '@/components/AppTabs';
 import { AppAlert } from '@/components/AppAlert';
 import { AppBreadcrumb } from '@/components/AppBreadcrumb';
-import { Icon } from '@/design-system/icons';
+import { AppIcon } from '@/components/AppIcon';
 import { useOrganizationRepository, useScheduleRepository } from '@/app/services';
 import type { Team } from '@/domain/team';
 import type { Sector } from '@/domain/sector';
@@ -168,7 +168,7 @@ export function NewSchedulePage() {
               }}
             >
               <div className="mx-auto grid h-10 w-10 place-items-center rounded-[var(--radius-control)] bg-orbita-elevated text-orbita-text-muted">
-                {Icon.upload}
+                <AppIcon name="upload" size={20} tone="muted" />
               </div>
               <p className="mt-4 text-[14px] font-semibold text-white">
                 Arraste seu arquivo ou clique para selecionar
