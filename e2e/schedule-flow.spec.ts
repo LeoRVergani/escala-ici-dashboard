@@ -4,9 +4,14 @@ import { fileURLToPath } from 'node:url';
 
 const FIXTURE_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src/lib/parser/fixtures');
 
+async function openLocalDevAccess(page: Page) {
+  await page.getByRole('button', { name: /Acessar ambiente de teste/ }).click();
+  await page.getByText('Entrar no ambiente local').click();
+}
+
 async function loginAndOpenSocEditor(page: Page) {
   await page.goto('/login');
-  await page.getByText('Entrar no ambiente local').click();
+  await openLocalDevAccess(page);
   await page.waitForURL('**/setores');
   await page.getByText('Abrir setor').click();
   await page.waitForURL('**/equipes');
@@ -21,7 +26,7 @@ async function loginAndOpenSocEditor(page: Page) {
 
 async function openSocSchedulesPage(page: Page) {
   await page.goto('/login');
-  await page.getByText('Entrar no ambiente local').click();
+  await openLocalDevAccess(page);
   await page.waitForURL('**/setores');
   await page.getByText('Abrir setor').click();
   await page.waitForURL('**/equipes');
@@ -45,14 +50,19 @@ test.describe('Escala ICI — checkpoint 1 end-to-end flow', () => {
 
   test('login local signs in without any Microsoft/MSAL simulation', async ({ page }) => {
     await page.goto('/login');
-    await expect(page.getByText('Entrar com Microsoft')).toBeDisabled();
-    await page.getByText('Entrar no ambiente local').click();
+    await page.getByText('Entrar com Microsoft').click();
+    await expect(
+      page.getByText('A integração Microsoft ainda não está configurada neste ambiente local.'),
+    ).toBeVisible();
+    await expect(page).toHaveURL(/\/login$/);
+
+    await openLocalDevAccess(page);
     await expect(page).toHaveURL(/\/setores$/);
   });
 
   test('sector selection shows COSI, team selection is filtered by sectorId', async ({ page }) => {
     await page.goto('/login');
-    await page.getByText('Entrar no ambiente local').click();
+    await openLocalDevAccess(page);
     await page.waitForURL('**/setores');
     await expect(page.getByText('COSI', { exact: true })).toBeVisible();
 

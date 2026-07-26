@@ -65,3 +65,23 @@ cores derivadas da mesma paleta em `src/components/ShiftPill.tsx` — não são
   círculo de `320px`–`480px`, conforme `ideas.md`: "gradientes restritos ao
   login, barras de progresso e confirmação".
 - Texto em gradiente (títulos de destaque): `from-[#3B82F6] to-[#8B5CF6] bg-clip-text text-transparent`.
+- Grade de fundo (`/login`): classe utilitária `.orbita-bg-grid` (ver `src/index.css`),
+  linhas de `1px` na cor `--color-orbita-border` a `16%` de opacidade, células
+  de `48px`. Não existe valor "pixel-exato" para esta textura — ver nota abaixo.
+
+## Nota — reconstrução da tela `/login` (hero com gráfico orbital)
+
+A composição de hero em duas colunas (pill "Dashboard de gestão", indicadores
+flutuantes ÁREA/EQUIPE/ESTADO, gráfico orbital, linha de progresso
+Importar/Revisar/Publicar e o callout "O caminho certo, sempre visível") **não
+existe** no `Abrir-protótipo-interativo-—-Dashboard-Escala-ICI-v2.html`. Essa
+tela veio de um mockup separado hospedado via Manus (`escaladash-*.manus.space`),
+do qual só temos dois screenshots (1920×1080), não HTML/CSS. Os valores usados
+para reconstruí-la em `src/features/auth/` foram medidos por inspeção visual
+dos screenshots e arredondados para a escala Tailwind/tokens existente — não
+são pixel-exatos como o resto desta tabela. Se o arquivo de origem do mockup
+Manus for encontrado depois, esta seção deve ser atualizada com os valores reais.
+
+Novo token adicionado para esta tela: `--size-control-height-lg: 3rem` (48px)
+— altura do CTA "Entrar com Microsoft", maior que o controle padrão (40px)
+por ser o call-to-action principal da página.

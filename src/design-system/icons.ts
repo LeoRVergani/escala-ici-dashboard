@@ -17,6 +17,9 @@ export const Icon = {
   chevronDown: '▾',
   close: '✕',
   more: '⋯',
+  shield: '🛡',
+  flask: '⚗',
+  arrowRight: '→',
 } as const;
 
 export type IconName = keyof typeof Icon;
