@@ -7,10 +7,11 @@ export interface AppDrawerProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  side?: 'left' | 'right';
 }
 
-/** Side panel sliding in from the right — used for the "manage collaborators" list. */
-export function AppDrawer({ open, onClose, title, children }: AppDrawerProps) {
+/** Side panel sliding in from the left or right — backs the "manage collaborators" list and the mobile nav sidebar. */
+export function AppDrawer({ open, onClose, title, children, side = 'right' }: AppDrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef, open);
 
@@ -38,7 +39,9 @@ export function AppDrawer({ open, onClose, title, children }: AppDrawerProps) {
         aria-modal="true"
         aria-labelledby="app-drawer-title"
         tabIndex={-1}
-        className="absolute right-0 top-0 h-full w-80 max-w-[calc(100vw-2rem)] border-l border-orbita-border bg-orbita-card p-4 shadow-[var(--shadow-overlay)]"
+        className={`absolute top-0 h-full w-80 max-w-[calc(100vw-2rem)] bg-orbita-card p-4 shadow-[var(--shadow-overlay)] ${
+          side === 'right' ? 'right-0 border-l border-orbita-border' : 'left-0 border-r border-orbita-border'
+        }`}
       >
         <div className="flex items-center justify-between">
           <h2 id="app-drawer-title" className="text-[14px] font-semibold text-white">

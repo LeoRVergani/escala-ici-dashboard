@@ -30,7 +30,7 @@ export function LoginAccessPanel() {
 
   const handleDevSignIn = async () => {
     await signIn();
-    navigate('/setores');
+    navigate('/organizacoes');
   };
 
   return (

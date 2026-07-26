@@ -4,6 +4,7 @@ import { AuthProvider } from './auth';
 import { RequireAuth } from './RequireAuth';
 import { ToastProvider } from '@/components/AppToast';
 import { LoginPage } from '@/features/auth/LoginPage';
+import { OrganizationsPage } from '@/features/organization/OrganizationsPage';
 import { SectorsPage } from '@/features/organization/SectorsPage';
 import { TeamsPage } from '@/features/organization/TeamsPage';
 import { SchedulesPage } from '@/features/schedules/SchedulesPage';
@@ -21,6 +22,11 @@ export function App() {
             {import.meta.env.DEV && (
               <Route path="/dev/design-system" component={DesignSystemShowcasePage} />
             )}
+            <Route path="/organizacoes">
+              <RequireAuth>
+                <OrganizationsPage />
+              </RequireAuth>
+            </Route>
             <Route path="/setores">
               <RequireAuth>
                 <SectorsPage />
@@ -48,7 +54,7 @@ export function App() {
             </Route>
             <Route>
               <RequireAuth>
-                <SectorsPage />
+                <OrganizationsPage />
               </RequireAuth>
             </Route>
           </Switch>

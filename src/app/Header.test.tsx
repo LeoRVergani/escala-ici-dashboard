@@ -31,8 +31,8 @@ describe('Header (scenario: setor/equipe aparecem corretamente no cabeçalho)', 
   });
 
   it('never claims Microsoft/backend are connected, and marks the local dev environment', () => {
-    renderHeader({ sectorCode: 'COSI', teamCode: 'NOC' });
+    renderHeader({ sectorCode: 'CODB', teamCode: 'NOC' });
     expect(screen.getAllByText(/Ambiente local de desenvolvimento|Local/).length).toBeGreaterThan(0);
-    expect(screen.getByText((_, node) => node?.textContent === 'COSI / NOC')).toBeInTheDocument();
+    expect(screen.getByText((_, node) => node?.textContent === 'CODB / NOC')).toBeInTheDocument();
   });
 });

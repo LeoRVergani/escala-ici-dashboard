@@ -16,7 +16,7 @@ export function Header({ breadcrumb }: HeaderProps) {
   return (
     <header className="flex flex-wrap items-center justify-between gap-y-2 border-b border-orbita-border/60 bg-orbita-bg px-4 py-3 sm:px-6 sm:py-4">
       <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-        <Link href="/setores" aria-label="Ir para minhas equipes">
+        <Link href="/organizacoes" aria-label="Ir para minhas organizações">
           <Brand />
         </Link>
         <span className="hidden shrink-0 rounded-[var(--radius-pill)] border border-orbita-border bg-orbita-elevated px-2.5 py-1 text-[11px] text-orbita-text-muted sm:inline-block">

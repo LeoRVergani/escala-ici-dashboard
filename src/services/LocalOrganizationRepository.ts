@@ -1,11 +1,84 @@
 import type { Sector } from '@/domain/sector';
 import type { Team } from '@/domain/team';
 import type { Member } from '@/domain/member';
+import type { Organization } from '@/domain/organization';
+import type { OrganizationMembership, UserAuthorization } from '@/domain/membership';
+import type { AuditEvent } from '@/domain/auditEvent';
 import { createId } from '@/domain/ids';
 import { localStore } from './storage/localStore';
-import type { OrganizationRepository } from './OrganizationRepository';
+import type { CreateOrganizationInput, OrganizationRepository } from './OrganizationRepository';
 
 export class LocalOrganizationRepository implements OrganizationRepository {
+  async listOrganizationsForUser(userId: string): Promise<Organization[]> {
+    const store = localStore.read();
+    const organizationIds = new Set(
+      store.memberships.filter((m) => m.userId === userId).map((m) => m.organizationId),
+    );
+    return store.organizations.filter((org) => org.active && organizationIds.has(org.id));
+  }
+
+  async getOrganization(organizationId: string): Promise<Organization | null> {
+    return localStore.read().organizations.find((org) => org.id === organizationId) ?? null;
+  }
+
+  async createOrganization(
+    input: CreateOrganizationInput,
+    creator: { userId: string; displayName: string },
+  ): Promise<Organization> {
+    const store = localStore.read();
+    const organization: Organization = {
+      id: createId(),
+      code: input.code,
+      name: input.name,
+      description: input.description,
+      active: true,
+      createdByUserId: creator.userId,
+      createdByDisplayName: creator.displayName,
+      createdAt: new Date().toISOString(),
+    };
+    store.organizations.push(organization);
+    store.memberships.push({
+      id: createId(),
+      organizationId: organization.id,
+      userId: creator.userId,
+      role: 'ADMIN',
+    });
+    const auditEvent: AuditEvent = {
+      id: createId(),
+      organizationId: organization.id,
+      type: 'ORGANIZATION_CREATED',
+      actorUserId: creator.userId,
+      actorDisplayName: creator.displayName,
+      occurredAt: organization.createdAt,
+    };
+    store.auditEvents.push(auditEvent);
+    localStore.write(store);
+    return organization;
+  }
+
+  async getMembership(userId: string, organizationId: string): Promise<OrganizationMembership | null> {
+    return (
+      localStore
+        .read()
+        .memberships.find((m) => m.userId === userId && m.organizationId === organizationId) ?? null
+    );
+  }
+
+  async getAuthorization(userId: string, organizationId: string): Promise<UserAuthorization | null> {
+    return (
+      localStore
+        .read()
+        .authorizations.find((a) => a.userId === userId && a.organizationId === organizationId) ?? null
+    );
+  }
+
+  async listAuditEvents(organizationId: string): Promise<AuditEvent[]> {
+    return localStore
+      .read()
+      .auditEvents.filter((event) => event.organizationId === organizationId)
+      .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
+  }
+
   async listSectors(): Promise<Sector[]> {
     return localStore.read().sectors.filter((s) => s.active);
   }

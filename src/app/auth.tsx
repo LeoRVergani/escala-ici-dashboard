@@ -7,6 +7,8 @@ interface AuthContextValue {
   loading: boolean;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
+  /** Dev-only identity switch — undefined when the active gateway doesn't support it (e.g. a real MSAL gateway). */
+  switchDevUser?: (user: AuthUser) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -31,8 +33,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const switchDevUser = gateway.signInAs
+    ? async (nextUser: AuthUser) => {
+        const signedIn = await gateway.signInAs!(nextUser);
+        setUser(signedIn);
+      }
+    : undefined;
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signOut, switchDevUser }}>
       {children}
     </AuthContext.Provider>
   );

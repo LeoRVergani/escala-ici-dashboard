@@ -16,8 +16,17 @@ export function SectorsPage() {
   const [sectors, setSectors] = useState<Sector[] | null>(null);
 
   useEffect(() => {
-    void organizationRepository.listSectors().then(setSectors);
-  }, [organizationRepository]);
+    if (!user) return;
+    void (async () => {
+      const organizations = await organizationRepository.listOrganizationsForUser(user.id);
+      const allSectors = await organizationRepository.listSectors();
+      const authorizations = await Promise.all(
+        organizations.map((org) => organizationRepository.getAuthorization(user.id, org.id)),
+      );
+      const authorizedSectorIds = new Set(authorizations.flatMap((auth) => auth?.sectorIds ?? []));
+      setSectors(allSectors.filter((sector) => authorizedSectorIds.has(sector.id)));
+    })();
+  }, [organizationRepository, user]);
 
   return (
     <div className="min-h-screen bg-orbita-bg">

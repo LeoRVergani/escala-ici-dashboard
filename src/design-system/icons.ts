@@ -20,6 +20,7 @@ export const Icon = {
   shield: '🛡',
   flask: '⚗',
   arrowRight: '→',
+  menu: '☰',
 } as const;
 
 export type IconName = keyof typeof Icon;

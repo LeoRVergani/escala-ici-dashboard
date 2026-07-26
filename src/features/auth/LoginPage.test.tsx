@@ -79,14 +79,14 @@ describe('LoginPage (checkpoint 1A — reprodução da tela Órbita)', () => {
     expect(trigger).toHaveFocus();
   });
 
-  it('signs in through the local dev environment and navigates to /setores', async () => {
+  it('signs in through the local dev environment and navigates to /organizacoes', async () => {
     const user = userEvent.setup();
     renderLoginPage();
 
     await user.click(screen.getByRole('button', { name: /Acessar ambiente de teste/ }));
     await user.click(screen.getByText('Entrar no ambiente local'));
 
-    await waitFor(() => expect(window.location.pathname).toBe('/setores'));
+    await waitFor(() => expect(window.location.pathname).toBe('/organizacoes'));
     expect(sessionStorage.getItem('escala-ici:dev-session')).not.toBeNull();
   });
 

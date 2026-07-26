@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { SEED_SECTOR_CODB_ID as CODB_SECTOR_ID, SEED_TEAM_NOC_ID as NOC_TEAM_ID } from '../src/domain/seedIds';
 
 const FIXTURE_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src/lib/parser/fixtures');
 
@@ -9,10 +10,16 @@ async function openLocalDevAccess(page: Page) {
   await page.getByText('Entrar no ambiente local').click();
 }
 
+async function openIciOrganization(page: Page) {
+  await page.waitForURL('**/organizacoes');
+  await page.getByText('Abrir organização').first().click();
+  await page.waitForURL('**/setores');
+}
+
 async function loginAndOpenSocEditor(page: Page) {
   await page.goto('/login');
   await openLocalDevAccess(page);
-  await page.waitForURL('**/setores');
+  await openIciOrganization(page);
   await page.getByText('Abrir setor').click();
   await page.waitForURL('**/equipes');
   const socCard = page.locator('[data-team-id]').filter({ hasText: 'SOC' }).first();
@@ -27,7 +34,7 @@ async function loginAndOpenSocEditor(page: Page) {
 async function openSocSchedulesPage(page: Page) {
   await page.goto('/login');
   await openLocalDevAccess(page);
-  await page.waitForURL('**/setores');
+  await openIciOrganization(page);
   await page.getByText('Abrir setor').click();
   await page.waitForURL('**/equipes');
   const socCard = page.locator('[data-team-id]').filter({ hasText: 'SOC' }).first();
@@ -57,20 +64,42 @@ test.describe('Escala ICI — checkpoint 1 end-to-end flow', () => {
     await expect(page).toHaveURL(/\/login$/);
 
     await openLocalDevAccess(page);
-    await expect(page).toHaveURL(/\/setores$/);
+    await expect(page).toHaveURL(/\/organizacoes$/);
   });
 
-  test('sector selection shows COSI, team selection is filtered by sectorId', async ({ page }) => {
+  test('sector selection shows only COSI for Claudio — never CODB (NOC belongs to CODB, not COSI)', async ({ page }) => {
     await page.goto('/login');
     await openLocalDevAccess(page);
-    await page.waitForURL('**/setores');
+    await openIciOrganization(page);
     await expect(page.getByText('COSI', { exact: true })).toBeVisible();
+    await expect(page.getByText('CODB', { exact: true })).not.toBeVisible();
 
     await page.getByText('Abrir setor').click();
     await page.waitForURL('**/equipes');
     await expect(page.getByText('SOC', { exact: true })).toBeVisible();
-    await expect(page.getByText('NOC', { exact: true })).toBeVisible();
     await expect(page.getByText('Plantão COSI', { exact: true })).toBeVisible();
+    await expect(page.getByText('NOC', { exact: true })).not.toBeVisible();
+  });
+
+  test('a manual URL to the CODB sector is denied for Claudio (COSI-only access)', async ({ page }) => {
+    await page.goto('/login');
+    await openLocalDevAccess(page);
+    await openIciOrganization(page);
+
+    // CODB is never shown to Claudio in the UI (filtered out above) — typing its URL directly must still be denied.
+    await page.goto(`/setores/${CODB_SECTOR_ID}/equipes`);
+    await expect(page.getByText('Você não possui acesso a este setor.')).toBeVisible();
+    await expect(page.getByText('Voltar às organizações autorizadas')).toBeVisible();
+  });
+
+  test('a manual URL to the NOC team is denied for Claudio (COSI-only access)', async ({ page }) => {
+    await page.goto('/login');
+    await openLocalDevAccess(page);
+    await openIciOrganization(page);
+
+    await page.goto(`/equipes/${NOC_TEAM_ID}/escalas`);
+    await expect(page.getByText('Você não possui acesso a esta equipe.')).toBeVisible();
+    await expect(page.getByText('Voltar às equipes autorizadas')).toBeVisible();
   });
 
   test('header always shows the selected sector/team (COSI / SOC)', async ({ page }) => {
@@ -244,8 +273,8 @@ test.describe('Escala ICI — checkpoint 1 end-to-end flow', () => {
     await expect(page.locator('td[data-member-id][data-date]').first().getByText('M', { exact: true })).toBeVisible();
 
     // It must also show up as "Continuar rascunho" from the team's schedules page.
-    await page.getByLabel('Ir para minhas equipes').click();
-    await page.waitForURL('**/setores');
+    await page.getByLabel('Ir para minhas organizações').click();
+    await openIciOrganization(page);
     await page.getByText('Abrir setor').click();
     await page.waitForURL('**/equipes');
     const socCard = page.locator('[data-team-id]').filter({ hasText: 'SOC' }).first();

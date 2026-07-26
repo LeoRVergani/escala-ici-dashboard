@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { DevAuthGateway } from './DevAuthGateway';
+import { DevAuthGateway, DEV_USERS } from './DevAuthGateway';
 
 describe('DevAuthGateway (scenario: login local)', () => {
   beforeEach(() => {
@@ -32,5 +32,18 @@ describe('DevAuthGateway (scenario: login local)', () => {
     const user = await gateway.signIn();
     expect(JSON.stringify(user).toLowerCase()).not.toContain('msal');
     expect(JSON.stringify(user).toLowerCase()).not.toContain('microsoft');
+  });
+
+  it('switches identity via signInAs, without requiring signIn() first', async () => {
+    const gateway = new DevAuthGateway();
+    const wmoriyama = DEV_USERS.find((option) => option.user.login === 'wmoriyama')!.user;
+
+    await gateway.signInAs(wmoriyama);
+
+    expect(gateway.getCurrentUser()).toEqual(wmoriyama);
+  });
+
+  it('lists exactly the two known dev identities, Claudio and wmoriyama', () => {
+    expect(DEV_USERS.map((option) => option.user.login).sort()).toEqual(['claudio.dev', 'wmoriyama']);
   });
 });

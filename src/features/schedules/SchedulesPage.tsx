@@ -6,34 +6,48 @@ import { AppBadge } from '@/components/AppBadge';
 import { AppButton } from '@/components/AppButton';
 import { AppBreadcrumb } from '@/components/AppBreadcrumb';
 import { AppAlert } from '@/components/AppAlert';
+import { useAuth } from '@/app/auth';
 import { useOrganizationRepository, useScheduleRepository } from '@/app/services';
 import type { Team } from '@/domain/team';
 import type { Sector } from '@/domain/sector';
 import type { Schedule } from '@/domain/schedule';
+import { isTeamAuthorized } from '@/domain/authorization';
 import { formatPeriod, formatDateTime } from '@/lib/format';
 
 export function SchedulesPage() {
   const { teamId } = useParams<{ teamId: string }>();
+  const { user } = useAuth();
   const organizationRepository = useOrganizationRepository();
   const scheduleRepository = useScheduleRepository();
   const [team, setTeam] = useState<Team | null | undefined>(undefined);
   const [sector, setSector] = useState<Sector | null>(null);
+  const [authorized, setAuthorized] = useState<boolean | undefined>(undefined);
   const [published, setPublished] = useState<Schedule | null | undefined>(undefined);
   const [draft, setDraft] = useState<Schedule | null | undefined>(undefined);
 
   useEffect(() => {
+    if (!user) return;
     let cancelled = false;
     void organizationRepository.getTeam(teamId).then(async (t) => {
       if (cancelled) return;
       setTeam(t);
-      if (t) setSector(await organizationRepository.getSector(t.sectorId));
+      if (!t) return;
+      const [s, authorization] = await Promise.all([
+        organizationRepository.getSector(t.sectorId),
+        organizationRepository
+          .getSector(t.sectorId)
+          .then((sec) => (sec ? organizationRepository.getAuthorization(user.id, sec.organizationId) : null)),
+      ]);
+      if (cancelled) return;
+      setSector(s);
+      setAuthorized(isTeamAuthorized(t.id, authorization ?? null));
     });
     void scheduleRepository.getPublishedByTeam(teamId).then((s) => !cancelled && setPublished(s));
     void scheduleRepository.getDraftByTeam(teamId).then((s) => !cancelled && setDraft(s));
     return () => {
       cancelled = true;
     };
-  }, [organizationRepository, scheduleRepository, teamId]);
+  }, [organizationRepository, scheduleRepository, teamId, user]);
 
   if (team === null) {
     return (
@@ -46,11 +60,25 @@ export function SchedulesPage() {
     );
   }
 
+  if (authorized === false) {
+    return (
+      <div className="min-h-screen bg-orbita-bg">
+        <Header breadcrumb={sector && team ? { sectorCode: sector.code, teamCode: team.code } : undefined} />
+        <main className="mx-auto max-w-4xl px-6 py-10">
+          <AppAlert tone="error">Você não possui acesso a esta equipe.</AppAlert>
+          <Link href="/organizacoes" className="mt-4 inline-block">
+            <AppButton variant="secondary">Voltar às equipes autorizadas</AppButton>
+          </Link>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-orbita-bg">
       <Header breadcrumb={sector && team ? { sectorCode: sector.code, teamCode: team.code } : undefined} />
       <main className="mx-auto max-w-4xl px-6 py-10">
-        {team && (
+        {team && authorized && (
           <>
             <AppBreadcrumb segments={sector ? [sector.code, team.code] : [team.code]} />
             <div className="mt-1 flex items-center gap-3">
@@ -67,51 +95,53 @@ export function SchedulesPage() {
           </>
         )}
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <AppCard className="p-5">
-            <h2 className="text-[15px] font-semibold text-white">Criar escala vazia</h2>
-            <p className="mt-1 text-[13px] text-orbita-text-muted">Escolha o tipo de escala e comece do zero.</p>
-            <Link href={`/equipes/${teamId}/escalas/nova?mode=empty`} className="mt-4 block">
-              <AppButton variant="secondary" className="w-full">
-                Criar agora
-              </AppButton>
-            </Link>
-          </AppCard>
-
-          <AppCard className="p-5">
-            <h2 className="text-[15px] font-semibold text-white">Importar XLS/XLSX</h2>
-            <p className="mt-1 text-[13px] text-orbita-text-muted">Formatos aceitos .xls e .xlsx.</p>
-            <Link href={`/equipes/${teamId}/escalas/nova?mode=import`} className="mt-4 block">
-              <AppButton variant="secondary" className="w-full">
-                Importar arquivo
-              </AppButton>
-            </Link>
-          </AppCard>
-
-          {draft && (
+        {authorized && (
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <AppCard className="p-5">
-              <h2 className="text-[15px] font-semibold text-white">Abrir rascunho</h2>
-              <p className="mt-1 text-[13px] text-orbita-text-muted">Salvo em {formatDateTime(draft.updatedAt)}.</p>
-              <Link href={`/escalas/${draft.id}`} className="mt-4 block">
-                <AppButton variant="primary" className="w-full">
-                  Continuar rascunho
-                </AppButton>
-              </Link>
-            </AppCard>
-          )}
-
-          {published && (
-            <AppCard className="p-5">
-              <h2 className="text-[15px] font-semibold text-white">Abrir escala publicada</h2>
-              <p className="mt-1 text-[13px] text-orbita-text-muted">Consulte a escala vigente sem editar.</p>
-              <Link href={`/escalas/${published.id}`} className="mt-4 block">
+              <h2 className="text-[15px] font-semibold text-white">Criar escala vazia</h2>
+              <p className="mt-1 text-[13px] text-orbita-text-muted">Escolha o tipo de escala e comece do zero.</p>
+              <Link href={`/equipes/${teamId}/escalas/nova?mode=empty`} className="mt-4 block">
                 <AppButton variant="secondary" className="w-full">
-                  Abrir escala atual
+                  Criar agora
                 </AppButton>
               </Link>
             </AppCard>
-          )}
-        </div>
+
+            <AppCard className="p-5">
+              <h2 className="text-[15px] font-semibold text-white">Importar XLS/XLSX</h2>
+              <p className="mt-1 text-[13px] text-orbita-text-muted">Formatos aceitos .xls e .xlsx.</p>
+              <Link href={`/equipes/${teamId}/escalas/nova?mode=import`} className="mt-4 block">
+                <AppButton variant="secondary" className="w-full">
+                  Importar arquivo
+                </AppButton>
+              </Link>
+            </AppCard>
+
+            {draft && (
+              <AppCard className="p-5">
+                <h2 className="text-[15px] font-semibold text-white">Abrir rascunho</h2>
+                <p className="mt-1 text-[13px] text-orbita-text-muted">Salvo em {formatDateTime(draft.updatedAt)}.</p>
+                <Link href={`/escalas/${draft.id}`} className="mt-4 block">
+                  <AppButton variant="primary" className="w-full">
+                    Continuar rascunho
+                  </AppButton>
+                </Link>
+              </AppCard>
+            )}
+
+            {published && (
+              <AppCard className="p-5">
+                <h2 className="text-[15px] font-semibold text-white">Abrir escala publicada</h2>
+                <p className="mt-1 text-[13px] text-orbita-text-muted">Consulte a escala vigente sem editar.</p>
+                <Link href={`/escalas/${published.id}`} className="mt-4 block">
+                  <AppButton variant="secondary" className="w-full">
+                    Abrir escala atual
+                  </AppButton>
+                </Link>
+              </AppCard>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );
