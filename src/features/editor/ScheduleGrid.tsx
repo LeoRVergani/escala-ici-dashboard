@@ -1,13 +1,14 @@
-import { useRef, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import type { Member } from '@/domain/member';
 import type { Assignment, ShiftCode } from '@/domain/schedule';
 import type { ScheduleType } from '@/domain/team';
-import { ShiftBadge } from './ShiftBadge';
+import { ShiftBadge, SHIFT_STYLES } from './ShiftBadge';
 import { ScheduleCell } from './ScheduleCell';
 import { CellActionMenu } from './CellActionMenu';
 import { DragPreview } from './DragPreview';
 import { ConflictIndicator } from './ConflictIndicator';
 import { SHIFT_OPTIONS_BY_SCHEDULE_TYPE } from './shiftOptions';
+import type { PrimaryShiftGroup } from './primaryShift';
 
 interface ScheduleGridProps {
   members: Member[];
@@ -24,6 +25,7 @@ interface ScheduleGridProps {
     keepSource: boolean,
   ) => void;
   warningsByMember?: Map<string, string>;
+  primaryShiftByMember?: Map<string, PrimaryShiftGroup>;
 }
 
 interface MenuState {
@@ -44,6 +46,15 @@ interface DragState {
 }
 
 const DRAG_THRESHOLD_PX = 4;
+const PRIMARY_SHIFT_GROUPS = ['madrugada', 'manha', 'tarde', 'noite', 'sem-turno-definido'] as const;
+
+const PRIMARY_SHIFT_LABELS: Record<PrimaryShiftGroup, { code: string; name: string }> = {
+  madrugada: { code: 'Md', name: 'Madrugada' },
+  manha: { code: 'M', name: 'Manhã' },
+  tarde: { code: 'T', name: 'Tarde' },
+  noite: { code: 'N', name: 'Noite' },
+  'sem-turno-definido': { code: '—', name: 'Sem turno definido' },
+};
 
 function dayLabel(date: string): string {
   const [, month, day] = date.split('-');
@@ -69,6 +80,7 @@ export function ScheduleGrid({
   onClear,
   onMove,
   warningsByMember,
+  primaryShiftByMember,
 }: ScheduleGridProps) {
   const [selection, setSelection] = useState<Set<string>>(new Set());
   const [anchor, setAnchor] = useState<{ memberId: string; date: string } | null>(null);
@@ -196,6 +208,93 @@ export function ScheduleGrid({
 
   const activeDrag = dragRef.current;
 
+  const groupedMembers = primaryShiftByMember
+    ? PRIMARY_SHIFT_GROUPS.map((group) => ({
+        group,
+        members: members.filter((member) => (primaryShiftByMember.get(member.id) ?? 'sem-turno-definido') === group),
+      })).filter(({ members }) => members.length > 0)
+    : null;
+
+  function renderMemberRow(member: Member) {
+    return (
+      <tr key={member.id}>
+        <td className="sticky left-0 z-10 border-b border-r border-orbita-border/60 bg-orbita-card px-4 py-2">
+          <div className="flex items-center gap-2">
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-pill)] bg-orbita-elevated text-[11px] font-bold text-white">
+              {member.name.slice(0, 2).toUpperCase()}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <p className="truncate text-[13px] font-medium text-white">{member.name}</p>
+                {warningsByMember?.has(member.id) && (
+                  <ConflictIndicator message={warningsByMember.get(member.id)!} />
+                )}
+              </div>
+              <p className="truncate text-[11px] text-orbita-text-faint">{member.corporateLogin}</p>
+            </div>
+          </div>
+        </td>
+        {dates.map((date) => {
+          const assignment = cellValue(member.id, date);
+          const k = cellKey(member.id, date);
+          return (
+            <ScheduleCell
+              key={date}
+              memberId={member.id}
+              date={date}
+              assignment={assignment}
+              selected={selection.has(k)}
+              dragTarget={dragTargetKey === k}
+              weekend={isWeekend(date)}
+              onPointerDown={(e) => handlePointerDown(e, member.id, date)}
+              onPointerMove={handlePointerMove}
+              onPointerUp={(e) => handlePointerUp(e, member.id, date)}
+              onClick={(e) => {
+                if (dragRef.current) return; // handled by pointerup
+                handleCellClick(e, member.id, date);
+              }}
+            />
+          );
+        })}
+      </tr>
+    );
+  }
+
+  function renderGroupHeader(group: PrimaryShiftGroup, memberCount: number) {
+    const label = PRIMARY_SHIFT_LABELS[group];
+    const style = group === 'sem-turno-definido' ? null : SHIFT_STYLES[group];
+
+    return (
+      <tr key={`group-${group}`}>
+        <td
+          colSpan={dates.length + 1}
+          className={`border-b border-orbita-border/60 px-4 py-2 text-[12px] font-medium ${
+            style ? 'bg-orbita-card text-orbita-text-muted' : 'bg-orbita-elevated text-orbita-text-faint'
+          }`}
+          style={style ? { borderLeft: `4px solid ${style.background}` } : undefined}
+        >
+          <span className="inline-flex items-center gap-2">
+            {style ? (
+              <span
+                className="grid h-5 min-w-8 place-items-center rounded-[var(--radius-pill)] px-2 text-[11px] font-bold"
+                style={{ background: style.background, color: style.color }}
+              >
+                {label.code}
+              </span>
+            ) : (
+              <span className="grid h-5 min-w-8 place-items-center rounded-[var(--radius-pill)] bg-orbita-card px-2 text-[11px] font-bold text-orbita-text-faint">
+                {label.code}
+              </span>
+            )}
+            <span>
+              {label.name} ({memberCount})
+            </span>
+          </span>
+        </td>
+      </tr>
+    );
+  }
+
   return (
     <div className="overflow-auto rounded-[var(--radius-card)] border border-orbita-border/60 bg-orbita-card">
       <table role="grid" className="w-full border-collapse text-[13px]">
@@ -215,48 +314,14 @@ export function ScheduleGrid({
           </tr>
         </thead>
         <tbody>
-          {members.map((member) => (
-            <tr key={member.id}>
-              <td className="sticky left-0 z-10 border-b border-r border-orbita-border/60 bg-orbita-card px-4 py-2">
-                <div className="flex items-center gap-2">
-                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-pill)] bg-orbita-elevated text-[11px] font-bold text-white">
-                    {member.name.slice(0, 2).toUpperCase()}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <p className="truncate text-[13px] font-medium text-white">{member.name}</p>
-                      {warningsByMember?.has(member.id) && (
-                        <ConflictIndicator message={warningsByMember.get(member.id)!} />
-                      )}
-                    </div>
-                    <p className="truncate text-[11px] text-orbita-text-faint">{member.corporateLogin}</p>
-                  </div>
-                </div>
-              </td>
-              {dates.map((date) => {
-                const assignment = cellValue(member.id, date);
-                const k = cellKey(member.id, date);
-                return (
-                  <ScheduleCell
-                    key={date}
-                    memberId={member.id}
-                    date={date}
-                    assignment={assignment}
-                    selected={selection.has(k)}
-                    dragTarget={dragTargetKey === k}
-                    weekend={isWeekend(date)}
-                    onPointerDown={(e) => handlePointerDown(e, member.id, date)}
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={(e) => handlePointerUp(e, member.id, date)}
-                    onClick={(e) => {
-                      if (dragRef.current) return; // handled by pointerup
-                      handleCellClick(e, member.id, date);
-                    }}
-                  />
-                );
-              })}
-            </tr>
-          ))}
+          {groupedMembers
+            ? groupedMembers.map(({ group, members }) => (
+                <Fragment key={group}>
+                  {renderGroupHeader(group, members.length)}
+                  {members.map(renderMemberRow)}
+                </Fragment>
+              ))
+            : members.map(renderMemberRow)}
         </tbody>
       </table>
       {usedShiftCodes.size > 0 && (

@@ -22,6 +22,7 @@ import { ScheduleGrid } from './ScheduleGrid';
 import { ScheduleToolbar } from './ScheduleToolbar';
 import { validateSchedule } from './validateSchedule';
 import type { AlertSeverity } from './validateSchedule';
+import { computePrimaryShiftByMember } from './primaryShift';
 
 type Step = 'editing' | 'review' | 'success';
 
@@ -170,6 +171,10 @@ function ScheduleEditorLoaded({
   }
 
   const validation = validateSchedule(editor.schedule, members);
+  const primaryShiftByMember = computePrimaryShiftByMember(
+    members.map((m) => m.id),
+    editor.schedule.assignments,
+  );
   const selectedWarningByMember = new Map<string, (typeof validation.warnings)[number]>();
   for (const warning of validation.warnings) {
     const selected = selectedWarningByMember.get(warning.memberId);
@@ -193,7 +198,7 @@ function ScheduleEditorLoaded({
   return (
     <div className="min-h-screen bg-orbita-bg">
       <Header breadcrumb={sector ? { sectorCode: sector.code, teamCode: team.code } : undefined} />
-      <main className="mx-auto max-w-6xl px-6 py-8">
+      <main className="mx-auto max-w-[1900px] px-4 py-8 sm:px-6 lg:px-10">
         {step === 'editing' && (
           <>
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -252,6 +257,7 @@ function ScheduleEditorLoaded({
                   onClear={editor.clearCells}
                   onMove={editor.moveCell}
                   warningsByMember={warningsByMember}
+                  primaryShiftByMember={primaryShiftByMember}
                 />
               )}
             </div>
