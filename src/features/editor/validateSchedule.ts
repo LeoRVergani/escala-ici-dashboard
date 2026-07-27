@@ -4,9 +4,18 @@ import { datesInPeriod } from '@/lib/period';
 import { workInterval } from '@/lib/parser/dates';
 import { fold } from '@/lib/parser/normalize';
 
+export type AlertSeverity = 'info' | 'atencao' | 'critico';
+export type AlertRuleCode = 'duplicateMember' | 'singleVacationDay' | 'sixByOne' | 'restHours' | 'onCallGap';
+
 export interface ScheduleWarning {
   memberId: string;
   message: string;
+  severity: AlertSeverity;
+  ruleCode: AlertRuleCode;
+  /** ISO date this warning refers to, quando aplicável (usado na chave de dedup). */
+  date?: string;
+  /** Chave determinística para deduplicação: `${memberId}|${ruleCode}|${date ?? message}`. */
+  dedupKey: string;
 }
 
 export interface ScheduleValidation {
@@ -30,6 +39,23 @@ function formatHours(hours: number): string {
   return Math.max(0, hours).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 }
 
+function scheduleWarning({
+  memberId,
+  message,
+  severity,
+  ruleCode,
+  date,
+}: Omit<ScheduleWarning, 'dedupKey'>): ScheduleWarning {
+  return {
+    memberId,
+    message,
+    severity,
+    ruleCode,
+    date,
+    dedupKey: `${memberId}|${ruleCode}|${date ?? message}`,
+  };
+}
+
 export function validateSchedule(schedule: Schedule, members: Member[]): ScheduleValidation {
   const errors: string[] = [];
   const warnings: ScheduleWarning[] = [];
@@ -51,10 +77,12 @@ export function validateSchedule(schedule: Schedule, members: Member[]): Schedul
       if (!key) continue;
       const previous = seenIdentity.get(key);
       if (previous && previous !== member.id) {
-        warnings.push({
+        warnings.push(scheduleWarning({
           memberId: member.id,
           message: `"${member.name}" aparece mais de uma vez na lista de colaboradores.`,
-        });
+          severity: 'atencao',
+          ruleCode: 'duplicateMember',
+        }));
         break;
       }
       seenIdentity.set(key, member.id);
@@ -79,17 +107,26 @@ export function validateSchedule(schedule: Schedule, members: Member[]): Schedul
 
       // Single vacation day sandwiched between two workdays.
       if (current?.shiftCode === 'ferias' && isWorkAssignment(before) && isWorkAssignment(next)) {
-        warnings.push({
+        warnings.push(scheduleWarning({
           memberId: member.id,
           message: `${member.name}: um único dia de férias entre dias trabalhados em ${formatBrDate(date)}.`,
-        });
+          severity: 'atencao',
+          ruleCode: 'singleVacationDay',
+          date,
+        }));
       }
 
       if (isWorkAssignment(current)) {
         streak += 1;
         if (streak > 6) {
           hasSixByOneExceeded = true;
-          warnings.push({ memberId: member.id, message: `${member.name} com ${streak} dias seguidos sem folga` });
+          warnings.push(scheduleWarning({
+            memberId: member.id,
+            message: `${member.name} com ${streak} dias seguidos sem folga`,
+            severity: 'critico',
+            ruleCode: 'sixByOne',
+            date,
+          }));
         }
       } else {
         streak = 0;
@@ -110,17 +147,22 @@ export function validateSchedule(schedule: Schedule, members: Member[]): Schedul
       const current = intervals[index];
       const restHours = (current.start.getTime() - previous.end.getTime()) / 3_600_000;
       if (restHours >= 11) continue;
-      warnings.push({
+      warnings.push(scheduleWarning({
         memberId: member.id,
         message: `${member.name}: descanso de ${formatHours(restHours)}h entre ${formatBrDate(previous.date)} (${previous.label}) e ${formatBrDate(current.date)} (${current.label}); mínimo esperado: 11h.`,
-      });
+        severity: 'critico',
+        ruleCode: 'restHours',
+        date: current.date,
+      }));
     }
 
     if (!hasSixByOneExceeded) {
-      warnings.push({
+      warnings.push(scheduleWarning({
         memberId: member.id,
         message: `${member.name}: regra 6x1 dentro do limite; nenhuma sequência acima de 6 dias trabalhados foi encontrada.`,
-      });
+        severity: 'info',
+        ruleCode: 'sixByOne',
+      }));
     }
   }
 
@@ -138,10 +180,18 @@ export function validateSchedule(schedule: Schedule, members: Member[]): Schedul
     );
     for (const date of dates) {
       if (!coveredDates.has(date)) {
-        warnings.push({ memberId: '', message: `Sem plantonista coberto em ${formatBrDate(date)}.` });
+        warnings.push(scheduleWarning({
+          memberId: '',
+          message: `Sem plantonista coberto em ${formatBrDate(date)}.`,
+          severity: 'atencao',
+          ruleCode: 'onCallGap',
+          date,
+        }));
       }
     }
   }
 
-  return { errors, warnings };
+  const dedupedWarnings = Array.from(new Map(warnings.map((warning) => [warning.dedupKey, warning])).values());
+
+  return { errors, warnings: dedupedWarnings };
 }

@@ -170,6 +170,97 @@ describe('validateSchedule', () => {
   });
 });
 
+describe('severidade e dedup', () => {
+  it('marca 6x1 excedido como crítico', () => {
+    const schedule = baseSchedule();
+    for (const date of datesInPeriod('2026-07-01', '2026-07-07')) {
+      schedule.assignments.push({ scheduleId: schedule.id, memberId: member.id, date, shiftCode: 'manha' });
+    }
+
+    const warning = validateSchedule(schedule, [member]).warnings.find(
+      (w) => w.ruleCode === 'sixByOne' && w.message.includes('7 dias seguidos'),
+    );
+
+    expect(warning?.severity).toBe('critico');
+    expect(warning?.ruleCode).toBe('sixByOne');
+  });
+
+  it('marca 6x1 dentro do limite como informativo', () => {
+    const schedule = baseSchedule();
+    schedule.assignments.push({ scheduleId: schedule.id, memberId: member.id, date: '2026-07-01', shiftCode: 'manha' });
+
+    const warning = validateSchedule(schedule, [member]).warnings.find((w) => w.message.includes('dentro do limite'));
+
+    expect(warning?.severity).toBe('info');
+  });
+
+  it('marca descanso menor que 11h como crítico', () => {
+    const schedule = baseSchedule();
+    schedule.assignments.push(
+      { scheduleId: schedule.id, memberId: member.id, date: '2026-07-01', shiftCode: 'noite' },
+      { scheduleId: schedule.id, memberId: member.id, date: '2026-07-02', shiftCode: 'manha' },
+    );
+
+    const warning = validateSchedule(schedule, [member]).warnings.find((w) => w.ruleCode === 'restHours');
+
+    expect(warning?.severity).toBe('critico');
+    expect(warning?.ruleCode).toBe('restHours');
+  });
+
+  it('marca colaborador duplicado como atenção', () => {
+    const duplicate: Member = { id: 'm2', teamId: 'team-1', name: 'Ana Souza Lima', corporateLogin: 'ana.souza', active: true };
+    const schedule = baseSchedule();
+    schedule.assignments.push({ scheduleId: schedule.id, memberId: member.id, date: '2026-07-01', shiftCode: 'manha' });
+
+    const warning = validateSchedule(schedule, [member, duplicate]).warnings.find((w) => w.ruleCode === 'duplicateMember');
+
+    expect(warning?.severity).toBe('atencao');
+    expect(warning?.ruleCode).toBe('duplicateMember');
+  });
+
+  it('marca cobertura de plantão ausente como atenção', () => {
+    const schedule = baseSchedule();
+    schedule.assignments.push(
+      { scheduleId: schedule.id, memberId: member.id, date: '2026-07-01', shiftCode: 'plantao' },
+      { scheduleId: schedule.id, memberId: member.id, date: '2026-07-10', shiftCode: 'plantao' },
+    );
+
+    const warning = validateSchedule(schedule, [member]).warnings.find((w) => w.ruleCode === 'onCallGap');
+
+    expect(warning?.severity).toBe('atencao');
+    expect(warning?.ruleCode).toBe('onCallGap');
+  });
+
+  it('retorna dedupKey não-vazio em todos os warnings', () => {
+    const schedule = baseSchedule();
+    schedule.assignments.push(
+      { scheduleId: schedule.id, memberId: member.id, date: '2026-07-01', shiftCode: 'noite' },
+      { scheduleId: schedule.id, memberId: member.id, date: '2026-07-02', shiftCode: 'manha' },
+    );
+
+    const warnings = validateSchedule(schedule, [member]).warnings;
+
+    expect(warnings.length).toBeGreaterThan(0);
+    expect(warnings.every((w) => w.dedupKey)).toBe(true);
+  });
+
+  it('gera dedupKey estável e determinístico para o mesmo input', () => {
+    const schedule = baseSchedule();
+    schedule.assignments.push(
+      { scheduleId: schedule.id, memberId: member.id, date: '2026-07-01', shiftCode: 'plantao' },
+      { scheduleId: schedule.id, memberId: member.id, date: '2026-07-10', shiftCode: 'plantao' },
+    );
+
+    // A estrutura atual não gera naturalmente duas ocorrências da mesma regra,
+    // membro e data; a dedup fica coberta por inspeção do Map em validateSchedule,
+    // e aqui garantimos que as chaves usadas por ele sejam determinísticas.
+    const firstRun = validateSchedule(schedule, [member]).warnings.map((w) => w.dedupKey);
+    const secondRun = validateSchedule(schedule, [member]).warnings.map((w) => w.dedupKey);
+
+    expect(firstRun).toEqual(secondRun);
+  });
+});
+
 describe('paridade KMP — 6x1', () => {
   const sixByOneWarnings = (schedule: Schedule, members: Member[] = [member]) =>
     validateSchedule(schedule, members).warnings.filter((w) => w.message.includes('dias seguidos'));

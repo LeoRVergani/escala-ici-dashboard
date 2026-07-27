@@ -21,8 +21,15 @@ import { useScheduleEditor } from './useScheduleEditor';
 import { ScheduleGrid } from './ScheduleGrid';
 import { ScheduleToolbar } from './ScheduleToolbar';
 import { validateSchedule } from './validateSchedule';
+import type { AlertSeverity } from './validateSchedule';
 
 type Step = 'editing' | 'review' | 'success';
+
+const alertSeverityRank: Record<AlertSeverity, number> = {
+  info: 1,
+  atencao: 2,
+  critico: 3,
+};
 
 export function ScheduleEditorPage() {
   const { scheduleId } = useParams<{ scheduleId: string }>();
@@ -163,7 +170,17 @@ function ScheduleEditorLoaded({
   }
 
   const validation = validateSchedule(editor.schedule, members);
-  const warningsByMember = new Map(validation.warnings.map((w) => [w.memberId, w.message]));
+  const selectedWarningByMember = new Map<string, (typeof validation.warnings)[number]>();
+  for (const warning of validation.warnings) {
+    const selected = selectedWarningByMember.get(warning.memberId);
+    if (!selected || alertSeverityRank[warning.severity] > alertSeverityRank[selected.severity]) {
+      selectedWarningByMember.set(warning.memberId, warning);
+    }
+  }
+  const warningsByMember = new Map<string, string>(
+    Array.from(selectedWarningByMember, ([memberId, warning]) => [memberId, warning.message]),
+  );
+  const actionableAlertCount = validation.warnings.filter((w) => w.severity !== 'info').length;
 
   if (!team) {
     return (
@@ -208,7 +225,7 @@ function ScheduleEditorLoaded({
               onUndo={editor.undo}
               onRedo={editor.redo}
               onSave={() => void handleSaveNow()}
-              alertCount={validation.warnings.length}
+              alertCount={actionableAlertCount}
               members={members}
               onAddMember={(name, login) => void handleAddMember(name, login)}
               onRemoveMember={(id) => void handleRemoveMember(id)}
