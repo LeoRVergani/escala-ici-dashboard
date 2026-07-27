@@ -68,6 +68,7 @@ export function validateSchedule(schedule: Schedule, members: Member[]): Schedul
     );
 
     let streak = 0;
+    let hasSixByOneExceeded = false;
     const intervals: Array<{ date: string; start: Date; end: Date; label: string }> = [];
 
     for (let index = 0; index < dates.length; index++) {
@@ -84,14 +85,14 @@ export function validateSchedule(schedule: Schedule, members: Member[]): Schedul
         });
       }
 
-      const resting = current ? RESTING_CODES.has(current.shiftCode) : false;
-      if (resting) {
-        streak = 0;
-      } else {
+      if (isWorkAssignment(current)) {
         streak += 1;
-        if (streak === 7) {
-          warnings.push({ memberId: member.id, message: `${member.name} com 7 dias seguidos sem folga` });
+        if (streak > 6) {
+          hasSixByOneExceeded = true;
+          warnings.push({ memberId: member.id, message: `${member.name} com ${streak} dias seguidos sem folga` });
         }
+      } else {
+        streak = 0;
       }
 
       if (isWorkAssignment(current)) {
@@ -112,6 +113,13 @@ export function validateSchedule(schedule: Schedule, members: Member[]): Schedul
       warnings.push({
         memberId: member.id,
         message: `${member.name}: descanso de ${formatHours(restHours)}h entre ${formatBrDate(previous.date)} (${previous.label}) e ${formatBrDate(current.date)} (${current.label}); mínimo esperado: 11h.`,
+      });
+    }
+
+    if (!hasSixByOneExceeded) {
+      warnings.push({
+        memberId: member.id,
+        message: `${member.name}: regra 6x1 dentro do limite; nenhuma sequência acima de 6 dias trabalhados foi encontrada.`,
       });
     }
   }

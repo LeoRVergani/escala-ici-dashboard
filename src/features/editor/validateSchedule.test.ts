@@ -169,3 +169,139 @@ describe('validateSchedule', () => {
     expect(result.warnings.some((w) => w.message.includes('Sem plantonista coberto'))).toBe(false);
   });
 });
+
+describe('paridade KMP — 6x1', () => {
+  const sixByOneWarnings = (schedule: Schedule, members: Member[] = [member]) =>
+    validateSchedule(schedule, members).warnings.filter((w) => w.message.includes('dias seguidos'));
+
+  const pushAssignments = (schedule: Schedule, shifts: Array<[string, Schedule['assignments'][number]['shiftCode']]>) => {
+    for (const [date, shiftCode] of shifts) {
+      schedule.assignments.push({ scheduleId: schedule.id, memberId: member.id, date, shiftCode });
+    }
+  };
+
+  it('não dispara 6x1 excedida com exatamente 6 dias trabalhados', () => {
+    const schedule = baseSchedule();
+    for (const date of datesInPeriod('2026-07-01', '2026-07-06')) {
+      schedule.assignments.push({ scheduleId: schedule.id, memberId: member.id, date, shiftCode: 'manha' });
+    }
+
+    expect(sixByOneWarnings(schedule)).toHaveLength(0);
+  });
+
+  it('mantém o alerta no 7º dia consecutivo', () => {
+    const schedule = baseSchedule();
+    for (const date of datesInPeriod('2026-07-01', '2026-07-07')) {
+      schedule.assignments.push({ scheduleId: schedule.id, memberId: member.id, date, shiftCode: 'manha' });
+    }
+
+    expect(sixByOneWarnings(schedule).some((w) => w.message.includes('7 dias seguidos'))).toBe(true);
+  });
+
+  it('dispara em cada dia excedente após o 6º dia trabalhado', () => {
+    const schedule = baseSchedule();
+    for (const date of datesInPeriod('2026-07-01', '2026-07-09')) {
+      schedule.assignments.push({ scheduleId: schedule.id, memberId: member.id, date, shiftCode: 'manha' });
+    }
+
+    expect(sixByOneWarnings(schedule).length).toBeGreaterThan(1);
+  });
+
+  it('célula vazia quebra a sequência de dias trabalhados', () => {
+    const schedule = baseSchedule();
+    schedule.periodEnd = '2026-07-13';
+    for (const date of [
+      ...datesInPeriod('2026-07-01', '2026-07-06'),
+      ...datesInPeriod('2026-07-08', '2026-07-13'),
+    ]) {
+      schedule.assignments.push({ scheduleId: schedule.id, memberId: member.id, date, shiftCode: 'manha' });
+    }
+
+    expect(sixByOneWarnings(schedule)).toHaveLength(0);
+  });
+
+  it('férias no 7º dia quebra a sequência', () => {
+    const schedule = baseSchedule();
+    pushAssignments(schedule, [
+      ['2026-07-01', 'manha'],
+      ['2026-07-02', 'manha'],
+      ['2026-07-03', 'manha'],
+      ['2026-07-04', 'manha'],
+      ['2026-07-05', 'manha'],
+      ['2026-07-06', 'manha'],
+      ['2026-07-07', 'ferias'],
+      ['2026-07-08', 'manha'],
+    ]);
+
+    expect(sixByOneWarnings(schedule)).toHaveLength(0);
+  });
+
+  it('afastamento quebra a sequência', () => {
+    const schedule = baseSchedule();
+    pushAssignments(schedule, [
+      ['2026-07-01', 'manha'],
+      ['2026-07-02', 'manha'],
+      ['2026-07-03', 'manha'],
+      ['2026-07-04', 'manha'],
+      ['2026-07-05', 'manha'],
+      ['2026-07-06', 'manha'],
+      ['2026-07-07', 'afastamento'],
+      ['2026-07-08', 'manha'],
+    ]);
+
+    expect(sixByOneWarnings(schedule)).toHaveLength(0);
+  });
+
+  it('feriado importado como folga quebra a sequência', () => {
+    const schedule = baseSchedule();
+    pushAssignments(schedule, [
+      ['2026-07-01', 'manha'],
+      ['2026-07-02', 'manha'],
+      ['2026-07-03', 'manha'],
+      ['2026-07-04', 'manha'],
+      ['2026-07-05', 'manha'],
+      ['2026-07-06', 'manha'],
+      // O parser mapeia FERIADO para folga; validateSchedule recebe o shiftCode normalizado.
+      ['2026-07-07', 'folga'],
+      ['2026-07-08', 'manha'],
+    ]);
+
+    expect(sixByOneWarnings(schedule)).toHaveLength(0);
+  });
+
+  it('não dispara quando o período termina exatamente no 6º dia trabalhado', () => {
+    const schedule = baseSchedule();
+    schedule.periodEnd = '2026-07-06';
+    for (const date of datesInPeriod(schedule.periodStart, schedule.periodEnd)) {
+      schedule.assignments.push({ scheduleId: schedule.id, memberId: member.id, date, shiftCode: 'manha' });
+    }
+
+    expect(sixByOneWarnings(schedule)).toHaveLength(0);
+  });
+
+  it('adiciona alerta informativo só quando o membro não excedeu 6x1', () => {
+    const other: Member = { id: 'm2', teamId: 'team-1', name: 'Bruno Lima', corporateLogin: 'bruno.lima', active: true };
+    const schedule = baseSchedule();
+    for (const date of datesInPeriod('2026-07-01', '2026-07-06')) {
+      schedule.assignments.push({ scheduleId: schedule.id, memberId: member.id, date, shiftCode: 'manha' });
+    }
+    for (const date of datesInPeriod('2026-07-01', '2026-07-07')) {
+      schedule.assignments.push({ scheduleId: schedule.id, memberId: other.id, date, shiftCode: 'manha' });
+    }
+
+    const warnings = validateSchedule(schedule, [member, other]).warnings;
+    expect(warnings.some((w) => w.memberId === member.id && w.message.includes('dentro do limite'))).toBe(true);
+    expect(warnings.some((w) => w.memberId === other.id && w.message.includes('dentro do limite'))).toBe(false);
+  });
+
+  it('conta dias consecutivos atravessando a virada de mês', () => {
+    const schedule = baseSchedule();
+    schedule.periodStart = '2026-07-28';
+    schedule.periodEnd = '2026-08-03';
+    for (const date of datesInPeriod(schedule.periodStart, schedule.periodEnd)) {
+      schedule.assignments.push({ scheduleId: schedule.id, memberId: member.id, date, shiftCode: 'manha' });
+    }
+
+    expect(sixByOneWarnings(schedule).some((w) => w.message.includes('7 dias seguidos'))).toBe(true);
+  });
+});

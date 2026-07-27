@@ -474,7 +474,8 @@ function socSpecial(raw: string): { login: string; value: CellValue } | null {
   const code = fold(m[1]);
   const login = m[2].toLowerCase();
   if (code.startsWith('ferias')) return { login, value: { shift: 'ferias', text: raw.trim() } };
-  if (code === 'du' || code === 'df' || code === 'folga' || code === 'bh' || code === 'an') {
+  // Feriado colapsa em folga para reduzir a superfície de mudança neste checkpoint.
+  if (code === 'du' || code === 'df' || code === 'folga' || code === 'feriado' || code === 'bh' || code === 'an') {
     return { login, value: { shift: 'folga', text: raw.trim() } };
   }
   if (code === 'he') return { login, value: { shift: 'extra', text: raw.trim() } };
@@ -632,7 +633,8 @@ function normalizeEscalistasCode(raw: Cell, rowShift: ShiftId): CellValue | null
   if (!text) return null;
   const key = fold(text);
   if (/^[1-6]$/.test(key)) return { shift: rowShift, text };
-  if (['df', 'du', 'bh', 'folga', 'an'].includes(key)) return { shift: 'folga', text };
+  // Feriado colapsa em folga para reduzir a superfície de mudança neste checkpoint.
+  if (['df', 'du', 'bh', 'folga', 'feriado', 'an'].includes(key)) return { shift: 'folga', text };
   if (key === 'x' || key.startsWith('ferias')) return { shift: 'ferias', text };
   if (key === 'he') return { shift: 'extra', text };
   if (key === '#') return { shift: 'afastamento', text };

@@ -18,7 +18,8 @@ const SHIFT_ALIASES: Array<[ShiftId, string[]]> = [
   ['manha', ['m', 'manha', 'mh', 'matutino', 'diurno 1']],
   ['tarde', ['t', 'tarde', 'td', 'vespertino']],
   ['noite', ['n', 'noite', 'nt', 'noturno']],
-  ['folga', ['f', 'fo', 'folga', 'dsr', 'descanso', 'off']],
+  // Feriado colapsa em folga para reduzir a superfície de mudança neste checkpoint.
+  ['folga', ['f', 'fo', 'folga', 'feriado', 'dsr', 'descanso', 'off']],
   ['ferias', ['fe', 'ferias', 'fer', 'vac', 'vacation']],
   ['plantao', ['p', 'pl', 'plantao', 'sobreaviso', 'on-call', 'oncall', '12x36', '24x48']],
   ['comercial', ['hc', 'com', 'comercial', 'horario comercial', 'adm', 'administrativo', 'expediente']],

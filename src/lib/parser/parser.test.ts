@@ -31,6 +31,7 @@ describe('normalizeShift', () => {
     expect(normalizeShift('MAD')?.shift).toBe('madrugada');
     expect(normalizeShift('F')?.shift).toBe('folga');
     expect(normalizeShift('DSR')?.shift).toBe('folga');
+    expect(normalizeShift('FERIADO')).toEqual({ shift: 'folga', text: 'FERIADO' });
     expect(normalizeShift('FÉRIAS')?.shift).toBe('ferias');
     expect(normalizeShift('12x36')?.shift).toBe('plantao');
     expect(normalizeShift('HC')?.shift).toBe('comercial');
