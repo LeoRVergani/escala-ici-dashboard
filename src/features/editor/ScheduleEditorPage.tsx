@@ -20,6 +20,7 @@ import { datesInPeriod } from '@/lib/period';
 import { useScheduleEditor } from './useScheduleEditor';
 import { ScheduleGrid } from './ScheduleGrid';
 import { ScheduleToolbar } from './ScheduleToolbar';
+import { AlertsPanel } from './AlertsPanel';
 import { validateSchedule } from './validateSchedule';
 import type { AlertSeverity } from './validateSchedule';
 import { computePrimaryShiftByMember } from './primaryShift';
@@ -134,6 +135,7 @@ function ScheduleEditorLoaded({
   const toast = useToast();
   const editor = useScheduleEditor(initialSchedule);
   const dates = datesInPeriod(editor.schedule.periodStart, editor.schedule.periodEnd);
+  const [alertsPanelOpen, setAlertsPanelOpen] = useState(false);
 
   useEffect(() => {
     if (!editor.dirty) return;
@@ -168,6 +170,18 @@ function ScheduleEditorLoaded({
     setMembers(members.filter((m) => m.id !== memberId));
     editor.setSchedule((s) => ({ ...s, members: s.members.filter((id) => id !== memberId) }));
     if (removed) toast.show(`${removed.name} removido(a) da escala.`, 'info');
+  }
+
+  function handleNavigateToAlert(memberId: string, date?: string) {
+    setAlertsPanelOpen(false);
+    if (!date) return;
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLElement>(`[data-member-id="${memberId}"][data-date="${date}"]`);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      el.classList.add('alert-highlight');
+      setTimeout(() => el.classList.remove('alert-highlight'), 1500);
+    });
   }
 
   const validation = validateSchedule(editor.schedule, members);
@@ -231,6 +245,7 @@ function ScheduleEditorLoaded({
               onRedo={editor.redo}
               onSave={() => void handleSaveNow()}
               alertCount={actionableAlertCount}
+              onOpenAlerts={() => setAlertsPanelOpen(true)}
               members={members}
               onAddMember={(name, login) => void handleAddMember(name, login)}
               onRemoveMember={(id) => void handleRemoveMember(id)}
@@ -239,6 +254,15 @@ function ScheduleEditorLoaded({
               onCopyWeek={() => editor.copyWeek(dates[0], members.map((m) => m.id))}
               onPasteWeek={() => editor.pasteWeek(dates[0], members.map((m) => m.id))}
               hasClipboard={editor.hasClipboard}
+            />
+
+            <AlertsPanel
+              open={alertsPanelOpen}
+              onClose={() => setAlertsPanelOpen(false)}
+              errors={validation.errors}
+              warnings={validation.warnings}
+              members={members}
+              onNavigateToAlert={handleNavigateToAlert}
             />
 
             <div className="mt-4">

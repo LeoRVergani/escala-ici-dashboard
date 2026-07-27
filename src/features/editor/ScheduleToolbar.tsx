@@ -16,6 +16,7 @@ interface ScheduleToolbarProps {
   onRedo: () => void;
   onSave: () => void;
   alertCount: number;
+  onOpenAlerts: () => void;
   onAddMember: (name: string, corporateLogin: string) => void;
   members: { id: string; name: string }[];
   onRemoveMember: (memberId: string) => void;
@@ -34,6 +35,7 @@ export function ScheduleToolbar({
   onRedo,
   onSave,
   alertCount,
+  onOpenAlerts,
   onAddMember,
   members,
   onRemoveMember,
@@ -67,9 +69,16 @@ export function ScheduleToolbar({
       </div>
       <div className="flex items-center gap-2">
         {alertCount > 0 && (
-          <AppBadge tone="warning">
-            <AppIcon name="warning" size={14} tone="warning" /> {alertCount} {alertCount === 1 ? 'alerta' : 'alertas'}
-          </AppBadge>
+          <button
+            type="button"
+            aria-label={`Ver ${alertCount} ${alertCount === 1 ? 'alerta' : 'alertas'}`}
+            onClick={onOpenAlerts}
+            className="focus-ring rounded-[var(--radius-pill)]"
+          >
+            <AppBadge tone="warning">
+              <AppIcon name="warning" size={14} tone="warning" /> {alertCount} {alertCount === 1 ? 'alerta' : 'alertas'}
+            </AppBadge>
+          </button>
         )}
         <AppDropdownMenu
           trigger={(triggerProps) => (
