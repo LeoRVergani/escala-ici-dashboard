@@ -29,6 +29,35 @@ describe('HttpApiClient', () => {
     });
   });
 
+  it('binds the default browser fetch to the global scope', async () => {
+    const originalFetch = globalThis.fetch;
+    const browserFetch = vi.fn(function (
+      this: unknown,
+      _input: Parameters<typeof fetch>[0],
+      _init?: Parameters<typeof fetch>[1],
+    ) {
+      if (this !== globalThis) throw new TypeError('Illegal invocation');
+      return Promise.resolve(
+        jsonResponse({
+          ok: true,
+          data: { status: 'ok' },
+          requestId: 'req-browser',
+        }),
+      );
+    }) as unknown as typeof fetch;
+
+    globalThis.fetch = browserFetch;
+    try {
+      const client = new HttpApiClient({ baseUrl: 'http://127.0.0.1:3001' });
+
+      await expect(client.get<{ status: string }>('/api/health')).resolves.toEqual({
+        status: 'ok',
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it('throws typed API errors', async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
       jsonResponse(

@@ -60,9 +60,10 @@ export class HttpApiClient {
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof fetch;
 
-  constructor({ baseUrl, fetchImpl = fetch }: HttpApiClientOptions) {
+  constructor({ baseUrl, fetchImpl }: HttpApiClientOptions) {
     this.baseUrl = baseUrl.replace(/\/+$/, '');
-    this.fetchImpl = fetchImpl;
+    const selectedFetch = fetchImpl ?? globalThis.fetch;
+    this.fetchImpl = (input, init) => selectedFetch.call(globalThis, input, init);
   }
 
   async get<T>(path: string): Promise<T> {

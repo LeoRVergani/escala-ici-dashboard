@@ -49,42 +49,18 @@ describe('LoginPage (checkpoint 1A — reprodução da tela Órbita)', () => {
     expect(window.location.pathname).toBe('/login');
   });
 
-  it('keeps the local test environment collapsed by default and expands it on click', async () => {
-    const user = userEvent.setup();
+  it('shows the local test environment entry directly', () => {
     renderLoginPage();
 
-    const trigger = screen.getByRole('button', { name: /Acessar ambiente de teste/ });
-    expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByText('Entrar no ambiente local')).not.toBeInTheDocument();
-
-    await user.click(trigger);
-    expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByText('Entrar no ambiente local')).toBeInTheDocument();
-
-    await user.click(trigger);
-    expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByText('Entrar no ambiente local')).not.toBeInTheDocument();
-  });
-
-  it('closes the disclosure with Escape and returns focus to the trigger', async () => {
-    const user = userEvent.setup();
-    renderLoginPage();
-
-    const trigger = screen.getByRole('button', { name: /Acessar ambiente de teste/ });
-    await user.click(trigger);
-    expect(trigger).toHaveAttribute('aria-expanded', 'true');
-
-    await user.keyboard('{Escape}');
-    expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(trigger).toHaveFocus();
+    expect(screen.getByText('Ambiente de teste')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Entrar no ambiente de teste/ })).toBeEnabled();
   });
 
   it('signs in through the local dev environment and navigates to /organizacoes', async () => {
     const user = userEvent.setup();
     renderLoginPage();
 
-    await user.click(screen.getByRole('button', { name: /Acessar ambiente de teste/ }));
-    await user.click(screen.getByText('Entrar no ambiente local'));
+    await user.click(screen.getByRole('button', { name: /Entrar no ambiente de teste/ }));
 
     await waitFor(() => expect(window.location.pathname).toBe('/organizacoes'));
     expect(sessionStorage.getItem('escala-ici:dev-session')).not.toBeNull();
@@ -98,14 +74,7 @@ describe('LoginPage (checkpoint 1A — reprodução da tela Órbita)', () => {
     expect(screen.getByText('Entrar com Microsoft').closest('button')).toHaveFocus();
 
     await user.tab();
-    const trigger = screen.getByRole('button', { name: /Acessar ambiente de teste/ });
-    expect(trigger).toHaveFocus();
-
-    await user.keyboard('{Enter}');
-    expect(trigger).toHaveAttribute('aria-expanded', 'true');
-
-    await user.tab();
-    expect(screen.getByText('Entrar no ambiente local').closest('button')).toHaveFocus();
+    expect(screen.getByText('Entrar no ambiente de teste').closest('button')).toHaveFocus();
   });
 
   it('marks the flow steps and the context graphic as non-interactive decoration', () => {
