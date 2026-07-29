@@ -60,7 +60,26 @@ describe('LoginPage (checkpoint 1A — reprodução da tela Órbita)', () => {
     await user.click(trigger);
 
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByLabelText('Nome da simulação')).toBeInTheDocument();
+    const nameInput = screen.getByLabelText('Nome da simulação');
+    expect(nameInput).toBeInTheDocument();
+    expect(nameInput).toHaveValue('');
+    expect(nameInput).toHaveAttribute('autocomplete', 'off');
+    expect(screen.getByRole('button', { name: /Simulação/ })).toBeDisabled();
+  });
+
+  it('does not keep the previous simulation name when reopening the menu', async () => {
+    const user = userEvent.setup();
+    renderLoginPage();
+
+    const trigger = screen.getByRole('button', { name: /Ambiente de teste/ });
+    await user.click(trigger);
+    await user.type(screen.getByLabelText('Nome da simulação'), 'Nome Temporario');
+    expect(screen.getByRole('button', { name: /Simulação/ })).toBeEnabled();
+
+    await user.click(trigger);
+    await user.click(trigger);
+
+    expect(screen.getByLabelText('Nome da simulação')).toHaveValue('');
     expect(screen.getByRole('button', { name: /Simulação/ })).toBeDisabled();
   });
 

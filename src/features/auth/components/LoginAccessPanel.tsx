@@ -79,6 +79,7 @@ export function LoginAccessPanel() {
               <span className="text-[13px] font-semibold text-white">Ambiente de teste</span>
             </>
           }
+          onOpenChange={() => setSimulationName('')}
         >
           <div className="rounded-[var(--radius-control)] border border-orbita-border/60 bg-orbita-surface p-3">
             <form
@@ -94,6 +95,7 @@ export function LoginAccessPanel() {
                 onChange={(event) => setSimulationName(event.target.value)}
                 placeholder="Digite o nome"
                 maxLength={80}
+                autoComplete="off"
                 disabled={signingIn}
               />
               <AppButton
