@@ -55,23 +55,24 @@ describe('LoginPage (checkpoint 1A — reprodução da tela Órbita)', () => {
 
     const trigger = screen.getByRole('button', { name: /Ambiente de teste/ });
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('button', { name: /Simulação/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Simulação Leonardo Vergani/ })).not.toBeInTheDocument();
 
     await user.click(trigger);
 
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('button', { name: /Simulação/ })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /Simulação Leonardo Vergani/ })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /Simulação Claudio/ })).toBeEnabled();
   });
 
-  it('signs in through the local dev environment and navigates to /organizacoes', async () => {
+  it('signs in as Leonardo through the local simulation and navigates to /organizacoes', async () => {
     const user = userEvent.setup();
     renderLoginPage();
 
     await user.click(screen.getByRole('button', { name: /Ambiente de teste/ }));
-    await user.click(screen.getByRole('button', { name: /Simulação/ }));
+    await user.click(screen.getByRole('button', { name: /Simulação Leonardo Vergani/ }));
 
     await waitFor(() => expect(window.location.pathname).toBe('/organizacoes'));
-    expect(sessionStorage.getItem('escala-ici:dev-session')).not.toBeNull();
+    expect(sessionStorage.getItem('escala-ici:dev-session')).toContain('lvergani');
   });
 
   it('reaches every interactive control via keyboard alone', async () => {
@@ -89,7 +90,7 @@ describe('LoginPage (checkpoint 1A — reprodução da tela Órbita)', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
 
     await user.tab();
-    expect(screen.getByText('Simulação').closest('button')).toHaveFocus();
+    expect(screen.getByText('Simulação Leonardo Vergani').closest('button')).toHaveFocus();
   });
 
   it('marks the flow steps and the context graphic as non-interactive decoration', () => {
