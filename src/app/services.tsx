@@ -6,6 +6,9 @@ import { LocalOrganizationRepository } from '@/services/LocalOrganizationReposit
 import type { ScheduleRepository } from '@/services/ScheduleRepository';
 import { LocalScheduleRepository } from '@/services/LocalScheduleRepository';
 import { HttpApiClient } from '@/services/http/HttpApiClient';
+import { HttpAuthGateway } from '@/services/http/HttpAuthGateway';
+import { HttpOrganizationRepository } from '@/services/http/HttpOrganizationRepository';
+import { HttpScheduleRepository } from '@/services/http/HttpScheduleRepository';
 
 interface Services {
   authGateway: AuthGateway;
@@ -21,12 +24,22 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
     () => {
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
       const useLocalAdapters = import.meta.env.VITE_USE_LOCAL_ADAPTERS !== 'false';
+      const apiClient = apiBaseUrl ? new HttpApiClient({ baseUrl: apiBaseUrl }) : null;
+
+      if (apiClient && !useLocalAdapters) {
+        return {
+          authGateway: new HttpAuthGateway(apiClient),
+          organizationRepository: new HttpOrganizationRepository(apiClient),
+          scheduleRepository: new HttpScheduleRepository(),
+          apiClient,
+        };
+      }
 
       return {
         authGateway: new DevAuthGateway(),
         organizationRepository: new LocalOrganizationRepository(),
         scheduleRepository: new LocalScheduleRepository(),
-        apiClient: apiBaseUrl && !useLocalAdapters ? new HttpApiClient({ baseUrl: apiBaseUrl }) : null,
+        apiClient: null,
       };
     },
     [],

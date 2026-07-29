@@ -69,7 +69,11 @@ export class HttpApiClient {
     return this.request<T>('GET', path);
   }
 
-  private async request<T>(method: string, path: string): Promise<T> {
+  async post<T>(path: string, body?: unknown): Promise<T> {
+    return this.request<T>('POST', path, body);
+  }
+
+  private async request<T>(method: string, path: string, requestBody?: unknown): Promise<T> {
     let response: Response;
     try {
       response = await this.fetchImpl(`${this.baseUrl}${path}`, {
@@ -77,21 +81,23 @@ export class HttpApiClient {
         credentials: 'include',
         headers: {
           accept: 'application/json',
+          ...(requestBody === undefined ? {} : { 'content-type': 'application/json' }),
         },
+        body: requestBody === undefined ? undefined : JSON.stringify(requestBody),
       });
     } catch {
       throw new BackendOfflineError();
     }
 
-    const body = (await response.json()) as ApiEnvelope<T>;
-    if (body.ok) return body.data;
+    const envelope = (await response.json()) as ApiEnvelope<T>;
+    if (envelope.ok) return envelope.data;
 
     throw new ApiClientError({
-      code: body.error.code,
-      message: body.error.message,
+      code: envelope.error.code,
+      message: envelope.error.message,
       status: response.status,
-      requestId: body.requestId,
-      details: body.error.details,
+      requestId: envelope.requestId,
+      details: envelope.error.details,
     });
   }
 }

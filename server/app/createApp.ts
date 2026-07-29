@@ -7,7 +7,10 @@ import { AppError } from '../domain/appError.js';
 import { errorHandler } from '../middleware/errorHandler.js';
 import { httpLogger } from '../middleware/httpLogger.js';
 import { notFoundMiddleware } from '../middleware/notFound.js';
+import { attachSession } from '../middleware/requireAuth.js';
 import { requestIdMiddleware } from '../middleware/requestId.js';
+import { createAuthRoutes } from '../routes/authRoutes.js';
+import { createOrganizationRoutes } from '../routes/organizationRoutes.js';
 import { createSystemRoutes } from '../routes/systemRoutes.js';
 
 export interface CreateAppOptions {
@@ -28,6 +31,7 @@ export function createApp({ config, packageInfo, logger }: CreateAppOptions) {
   app.disable('x-powered-by');
   app.use(requestIdMiddleware);
   app.use(httpLogger(appLogger));
+  app.use(attachSession);
   app.use(
     cors({
       origin(origin, callback) {
@@ -41,6 +45,8 @@ export function createApp({ config, packageInfo, logger }: CreateAppOptions) {
     }),
   );
   app.use(express.json({ limit: '1mb' }));
+  app.use('/api/auth', createAuthRoutes(config));
+  app.use('/api', createOrganizationRoutes());
   app.use('/api', createSystemRoutes(config, packageInfo));
   app.use(notFoundMiddleware);
   app.use(errorHandler);
