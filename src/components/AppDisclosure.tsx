@@ -25,7 +25,7 @@ export function AppDisclosure({ label, children, defaultOpen = false }: AppDiscl
       <button
         ref={triggerRef}
         type="button"
-        className="focus-ring flex w-full items-center justify-between gap-2 rounded-[var(--radius-control)] py-1 text-[12px] text-orbita-text-faint transition hover:text-orbita-text-muted"
+        className="focus-ring flex w-full cursor-pointer items-center justify-between gap-2 rounded-[var(--radius-control)] py-1 text-[12px] text-orbita-text-faint transition hover:text-orbita-text-muted disabled:cursor-not-allowed"
         aria-expanded={open}
         aria-controls={contentId}
         onClick={() => setOpen((current) => !current)}

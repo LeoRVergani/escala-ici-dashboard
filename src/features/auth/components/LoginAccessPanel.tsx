@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { AppButton } from '@/components/AppButton';
+import { AppDisclosure } from '@/components/AppDisclosure';
 import { useToast } from '@/components/AppToast';
 import { useAuth } from '@/app/auth';
 import { AppIcon } from '@/components/AppIcon';
@@ -56,27 +57,30 @@ export function LoginAccessPanel() {
         <AppIcon name="arrowRight" size={16} />
       </AppButton>
 
-      <div className="mt-4 rounded-[var(--radius-control)] border border-orbita-border/60 bg-orbita-surface p-4">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 rounded-[var(--radius-pill)] bg-orbita-elevated p-1.5">
-            <AppIcon name="flask" size={14} tone="muted" />
-          </span>
-          <div>
-            <p className="text-[13px] font-semibold text-white">Ambiente de teste</p>
-            <p className="mt-1 text-[12px] text-orbita-text-faint">
-              Ambiente de desenvolvimento. Nao publica escalas reais.
-            </p>
-          </div>
-        </div>
-        <AppButton
-          type="button"
-          variant="secondary"
-          className="mt-3 w-full"
-          onClick={handleDevSignIn}
-          disabled={signingIn}
+      <div className="mt-4">
+        <AppDisclosure
+          label={
+            <>
+              <span className="rounded-[var(--radius-pill)] bg-orbita-elevated p-1.5">
+                <AppIcon name="flask" size={14} tone="muted" />
+              </span>
+              <span className="text-[13px] font-semibold text-white">Ambiente de teste</span>
+            </>
+          }
         >
-          {signingIn ? 'Entrando...' : 'Entrar no ambiente de teste'}
-        </AppButton>
+          <div className="rounded-[var(--radius-control)] border border-orbita-border/60 bg-orbita-surface p-3">
+            <AppButton
+              type="button"
+              variant="secondary"
+              className="w-full justify-between"
+              onClick={handleDevSignIn}
+              disabled={signingIn}
+            >
+              <span>{signingIn ? 'Entrando...' : 'Simulação'}</span>
+              <AppIcon name="arrowRight" size={16} />
+            </AppButton>
+          </div>
+        </AppDisclosure>
       </div>
 
       <div className="mt-6 flex items-center gap-3 text-[11px] text-orbita-text-faint">

@@ -49,18 +49,26 @@ describe('LoginPage (checkpoint 1A — reprodução da tela Órbita)', () => {
     expect(window.location.pathname).toBe('/login');
   });
 
-  it('shows the local test environment entry directly', () => {
+  it('keeps the local simulation entry hidden until the test environment menu opens', async () => {
+    const user = userEvent.setup();
     renderLoginPage();
 
-    expect(screen.getByText('Ambiente de teste')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Entrar no ambiente de teste/ })).toBeEnabled();
+    const trigger = screen.getByRole('button', { name: /Ambiente de teste/ });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('button', { name: /Simulação/ })).not.toBeInTheDocument();
+
+    await user.click(trigger);
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: /Simulação/ })).toBeEnabled();
   });
 
   it('signs in through the local dev environment and navigates to /organizacoes', async () => {
     const user = userEvent.setup();
     renderLoginPage();
 
-    await user.click(screen.getByRole('button', { name: /Entrar no ambiente de teste/ }));
+    await user.click(screen.getByRole('button', { name: /Ambiente de teste/ }));
+    await user.click(screen.getByRole('button', { name: /Simulação/ }));
 
     await waitFor(() => expect(window.location.pathname).toBe('/organizacoes'));
     expect(sessionStorage.getItem('escala-ici:dev-session')).not.toBeNull();
@@ -74,7 +82,14 @@ describe('LoginPage (checkpoint 1A — reprodução da tela Órbita)', () => {
     expect(screen.getByText('Entrar com Microsoft').closest('button')).toHaveFocus();
 
     await user.tab();
-    expect(screen.getByText('Entrar no ambiente de teste').closest('button')).toHaveFocus();
+    const trigger = screen.getByRole('button', { name: /Ambiente de teste/ });
+    expect(trigger).toHaveFocus();
+
+    await user.keyboard('{Enter}');
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    await user.tab();
+    expect(screen.getByText('Simulação').closest('button')).toHaveFocus();
   });
 
   it('marks the flow steps and the context graphic as non-interactive decoration', () => {
