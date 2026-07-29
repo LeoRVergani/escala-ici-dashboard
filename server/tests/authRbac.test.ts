@@ -139,6 +139,32 @@ describe('auth and RBAC', () => {
     });
   });
 
+  it('allows a custom display name for local simulation while preserving lvergani permissions', async () => {
+    await withServer({}, async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/api/auth/dev-session`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ login: 'lvergani', displayName: 'Leo Teste' }),
+      });
+      expect(response.status).toBe(200);
+      const cookie = firstCookie(response);
+
+      const meResponse = await fetch(`${baseUrl}/api/me`, { headers: { cookie } });
+      const body = await meResponse.json() as {
+        data: { user: { displayName: string; login: string; roles: string[] }; authorization: { teamIds: string[] } };
+      };
+
+      expect(body.data.user.displayName).toBe('Leo Teste');
+      expect(body.data.user.login).toBe('lvergani');
+      expect(body.data.user.roles).toEqual(['ADMIN', 'DEVELOPER']);
+      expect(body.data.authorization.teamIds.sort()).toEqual([
+        SEED_TEAM_NOC_ID,
+        SEED_TEAM_PLANTAO_COSI_ID,
+        SEED_TEAM_SOC_ID,
+      ].sort());
+    });
+  });
+
   it('refuses dev login when the flag is disabled', async () => {
     await withServer({ DEV_AUTH_ENABLED: 'false' }, async (baseUrl) => {
       const response = await fetch(`${baseUrl}/api/auth/dev-session`, {

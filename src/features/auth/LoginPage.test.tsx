@@ -55,24 +55,25 @@ describe('LoginPage (checkpoint 1A — reprodução da tela Órbita)', () => {
 
     const trigger = screen.getByRole('button', { name: /Ambiente de teste/ });
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('button', { name: /Simulação Leonardo Vergani/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Simulação/ })).not.toBeInTheDocument();
 
     await user.click(trigger);
 
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('button', { name: /Simulação Leonardo Vergani/ })).toBeEnabled();
-    expect(screen.getByRole('button', { name: /Simulação Claudio/ })).toBeEnabled();
+    expect(screen.getByLabelText('Nome da simulação')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Simulação/ })).toBeDisabled();
   });
 
-  it('signs in as Leonardo through the local simulation and navigates to /organizacoes', async () => {
+  it('signs in with the typed simulation name and navigates to /organizacoes', async () => {
     const user = userEvent.setup();
     renderLoginPage();
 
     await user.click(screen.getByRole('button', { name: /Ambiente de teste/ }));
-    await user.click(screen.getByRole('button', { name: /Simulação Leonardo Vergani/ }));
+    await user.type(screen.getByLabelText('Nome da simulação'), 'Leo Teste');
+    await user.click(screen.getByRole('button', { name: /Simulação/ }));
 
     await waitFor(() => expect(window.location.pathname).toBe('/organizacoes'));
-    expect(sessionStorage.getItem('escala-ici:dev-session')).toContain('lvergani');
+    expect(sessionStorage.getItem('escala-ici:dev-session')).toContain('Leo Teste');
   });
 
   it('reaches every interactive control via keyboard alone', async () => {
@@ -90,7 +91,7 @@ describe('LoginPage (checkpoint 1A — reprodução da tela Órbita)', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
 
     await user.tab();
-    expect(screen.getByText('Simulação Leonardo Vergani').closest('button')).toHaveFocus();
+    expect(screen.getByLabelText('Nome da simulação')).toHaveFocus();
   });
 
   it('marks the flow steps and the context graphic as non-interactive decoration', () => {

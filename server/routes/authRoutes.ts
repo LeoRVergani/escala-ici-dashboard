@@ -11,6 +11,7 @@ import { sendOk } from '../app/responses.js';
 
 const devSessionSchema = z.object({
   login: z.enum(['claudio', 'lvergani']).default('claudio'),
+  displayName: z.string().trim().min(1).max(80).optional(),
 });
 
 export function createAuthRoutes(config: AppConfig) {
@@ -26,7 +27,10 @@ export function createAuthRoutes(config: AppConfig) {
       return;
     }
 
-    const user = DEV_USERS[req.body.login];
+    const baseUser = DEV_USERS[req.body.login];
+    const user = req.body.displayName
+      ? { ...baseUser, displayName: req.body.displayName }
+      : baseUser;
     const token = createSession(user);
     setSessionCookie(res, token);
     sendOk(res, { user });

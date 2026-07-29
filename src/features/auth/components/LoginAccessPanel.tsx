@@ -2,24 +2,13 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { AppButton } from '@/components/AppButton';
 import { AppDisclosure } from '@/components/AppDisclosure';
+import { AppInput } from '@/components/AppInput';
 import { useToast } from '@/components/AppToast';
 import { useAuth } from '@/app/auth';
 import { AppIcon } from '@/components/AppIcon';
-import type { AuthUser } from '@/services/AuthGateway';
 
 const MICROSOFT_UNAVAILABLE_MESSAGE =
   'A integração Microsoft ainda não está configurada neste ambiente local.';
-
-const SIMULATION_USERS: Array<{ user: AuthUser; role: string }> = [
-  {
-    user: { id: 'dev-lvergani', name: 'Leonardo Vergani', login: 'lvergani' },
-    role: 'Administrador e desenvolvedor',
-  },
-  {
-    user: { id: 'dev-claudio', name: 'Claudio', login: 'claudio' },
-    role: 'Gestor SOC e Plantão',
-  },
-];
 
 function MicrosoftMark() {
   return (
@@ -36,17 +25,24 @@ export function LoginAccessPanel() {
   const { signIn, switchDevUser } = useAuth();
   const { show } = useToast();
   const [, navigate] = useLocation();
-  const [signingInAs, setSigningInAs] = useState<string | null>(null);
+  const [simulationName, setSimulationName] = useState('');
+  const [signingIn, setSigningIn] = useState(false);
+  const normalizedSimulationName = simulationName.trim();
 
   const handleMicrosoftClick = () => {
     show(MICROSOFT_UNAVAILABLE_MESSAGE, 'info');
   };
 
-  const handleDevSignIn = async (user: AuthUser) => {
-    setSigningInAs(user.login);
+  const handleDevSignIn = async () => {
+    if (!normalizedSimulationName) return;
+    setSigningIn(true);
     try {
       if (switchDevUser) {
-        await switchDevUser(user);
+        await switchDevUser({
+          id: 'dev-lvergani',
+          name: normalizedSimulationName,
+          login: 'lvergani',
+        });
       } else {
         await signIn();
       }
@@ -54,7 +50,7 @@ export function LoginAccessPanel() {
     } catch {
       show('Não foi possível entrar no ambiente de teste. Confira se o backend está rodando.', 'error');
     } finally {
-      setSigningInAs(null);
+      setSigningIn(false);
     }
   };
 
@@ -85,28 +81,31 @@ export function LoginAccessPanel() {
           }
         >
           <div className="rounded-[var(--radius-control)] border border-orbita-border/60 bg-orbita-surface p-3">
-            <div className="grid gap-2">
-              {SIMULATION_USERS.map(({ user, role }) => (
-                <AppButton
-                  key={user.id}
-                  type="button"
-                  variant="secondary"
-                  className="w-full justify-between px-3 text-left"
-                  onClick={() => void handleDevSignIn(user)}
-                  disabled={signingInAs !== null}
-                >
-                  <span className="min-w-0">
-                    <span className="block truncate">
-                      {signingInAs === user.login ? 'Entrando...' : `Simulação ${user.name}`}
-                    </span>
-                    <span className="block truncate text-[11px] font-normal text-orbita-text-muted">
-                      {role}
-                    </span>
-                  </span>
-                  <AppIcon name="arrowRight" size={16} />
-                </AppButton>
-              ))}
-            </div>
+            <form
+              className="grid gap-3"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void handleDevSignIn();
+              }}
+            >
+              <AppInput
+                label="Nome da simulação"
+                value={simulationName}
+                onChange={(event) => setSimulationName(event.target.value)}
+                placeholder="Digite o nome"
+                maxLength={80}
+                disabled={signingIn}
+              />
+              <AppButton
+                type="submit"
+                variant="secondary"
+                className="w-full justify-between"
+                disabled={signingIn || !normalizedSimulationName}
+              >
+                <span>{signingIn ? 'Entrando...' : 'Simulação'}</span>
+                <AppIcon name="arrowRight" size={16} />
+              </AppButton>
+            </form>
           </div>
         </AppDisclosure>
       </div>

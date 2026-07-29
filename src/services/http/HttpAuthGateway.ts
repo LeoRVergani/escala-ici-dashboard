@@ -35,9 +35,12 @@ export class HttpAuthGateway implements AuthGateway {
   }
 
   async signInAs(user: AuthUser): Promise<AuthUser> {
-    const login = user.login === 'lvergani' ? 'lvergani' : 'claudio';
+    const login = user.login === 'claudio' ? 'claudio' : 'lvergani';
     const signedIn = toAuthUser(
-      await this.apiClient.post<IdentityResponse>('/api/auth/dev-session', { login }),
+      await this.apiClient.post<IdentityResponse>('/api/auth/dev-session', {
+        login,
+        displayName: user.name,
+      }),
     );
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(signedIn));
     return signedIn;
