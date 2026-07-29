@@ -10,7 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-api
 *.local
+
+# Local prototype/artifact kept outside the active Dashboard source tree.
+client/
 
 # Test artifacts
 playwright-report

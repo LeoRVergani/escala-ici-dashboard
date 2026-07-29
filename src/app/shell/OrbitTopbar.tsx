@@ -1,6 +1,7 @@
 import { AppIconButton } from '@/components/AppIconButton';
 import { AppIcon } from '@/components/AppIcon';
 import { AuthenticatedUserMenu } from './AuthenticatedUserMenu';
+import { BackendStatusBadge } from './BackendStatusBadge';
 import { CurrentContextCard } from './CurrentContextCard';
 
 interface OrbitTopbarProps {
@@ -18,6 +19,7 @@ export function OrbitTopbar({ contextLabel, onOpenMobileNav }: OrbitTopbarProps)
         <CurrentContextCard label="Contexto atual" value={contextLabel} />
       </div>
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <BackendStatusBadge />
         <span className="relative">
           <AppIconButton label="Notificações">
             <AppIcon name="bell" decorative />
