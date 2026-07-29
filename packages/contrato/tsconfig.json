@@ -9,6 +9,7 @@
     "types": ["node", "vitest/globals"],
     "skipLibCheck": true,
     "strict": true,
+    "noEmit": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noUnusedLocals": true,
