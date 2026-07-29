@@ -21,6 +21,12 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["server/**/*.ts", "src/lib/parser/**/*.ts", "src/domain/schedule.ts"],
+  "include": [
+    "server/**/*.ts",
+    "src/lib/parser/**/*.ts",
+    "src/domain/**/*.ts",
+    "src/lib/period.ts",
+    "src/features/editor/validateSchedule.ts"
+  ],
   "exclude": ["server/tests/**/*.ts", "src/lib/parser/**/*.test.ts"]
 }

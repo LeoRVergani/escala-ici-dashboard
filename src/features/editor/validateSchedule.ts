@@ -1,8 +1,8 @@
-import type { Member } from '@/domain/member';
-import type { Schedule, Assignment } from '@/domain/schedule';
-import { datesInPeriod } from '@/lib/period';
-import { workInterval } from '@/lib/parser/dates';
-import { fold } from '@/lib/parser/normalize';
+import type { Member } from '../../domain/member';
+import type { Schedule, Assignment } from '../../domain/schedule';
+import { datesInPeriod } from '../../lib/period';
+import { workInterval } from '../../lib/parser/dates';
+import { fold } from '../../lib/parser/normalize';
 
 export type AlertSeverity = 'info' | 'atencao' | 'critico';
 export type AlertRuleCode = 'duplicateMember' | 'singleVacationDay' | 'sixByOne' | 'restHours' | 'onCallGap';

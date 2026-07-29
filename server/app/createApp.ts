@@ -14,6 +14,7 @@ import { createDraftRoutes } from '../routes/draftRoutes.js';
 import { createImportRoutes } from '../routes/importRoutes.js';
 import { createOrganizationRoutes } from '../routes/organizationRoutes.js';
 import { createSystemRoutes } from '../routes/systemRoutes.js';
+import { createValidationRoutes } from '../routes/validationRoutes.js';
 
 export interface CreateAppOptions {
   config: AppConfig;
@@ -51,6 +52,7 @@ export function createApp({ config, packageInfo, logger }: CreateAppOptions) {
   app.use('/api', createOrganizationRoutes());
   app.use('/api', createDraftRoutes());
   app.use('/api', createImportRoutes(config));
+  app.use('/api', createValidationRoutes());
   app.use('/api', createSystemRoutes(config, packageInfo));
   app.use(notFoundMiddleware);
   app.use(errorHandler);
