@@ -91,6 +91,29 @@ export const DEV_USERS: Record<string, UserIdentity> = {
   },
 };
 
+function createSimulationLogin(displayName: string): string {
+  const slug = displayName
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '.')
+    .replace(/^\.+|\.+$/g, '');
+  return slug || `simulacao-${Date.now()}`;
+}
+
+export function createSimulationUser(displayName: string): UserIdentity {
+  const login = createSimulationLogin(displayName);
+  return {
+    id: `dev-simulation-${login}`,
+    displayName,
+    login,
+    roles: ['ADMIN', 'DEVELOPER'],
+    organizationId: SEED_ORG_ICI_ID,
+    authorizedSectorIds: [SEED_AREA_COSI_ID],
+    authorizedTeamIds: [SEED_TEAM_SOC_ID, SEED_TEAM_NOC_ID, SEED_TEAM_PLANTAO_COSI_ID],
+  };
+}
+
 export function isAdminLike(user: UserIdentity): boolean {
   return user.roles.includes('ADMIN') || user.roles.includes('DEVELOPER');
 }

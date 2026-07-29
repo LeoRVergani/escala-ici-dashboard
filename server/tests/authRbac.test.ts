@@ -139,12 +139,12 @@ describe('auth and RBAC', () => {
     });
   });
 
-  it('allows a custom display name for local simulation while preserving lvergani permissions', async () => {
+  it('allows a custom local simulation identity without using a fixed user name', async () => {
     await withServer({}, async (baseUrl) => {
       const response = await fetch(`${baseUrl}/api/auth/dev-session`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ login: 'lvergani', displayName: 'Leo Teste' }),
+        body: JSON.stringify({ displayName: 'Leo Teste' }),
       });
       expect(response.status).toBe(200);
       const cookie = firstCookie(response);
@@ -155,13 +155,28 @@ describe('auth and RBAC', () => {
       };
 
       expect(body.data.user.displayName).toBe('Leo Teste');
-      expect(body.data.user.login).toBe('lvergani');
+      expect(body.data.user.login).toBe('leo.teste');
       expect(body.data.user.roles).toEqual(['ADMIN', 'DEVELOPER']);
       expect(body.data.authorization.teamIds.sort()).toEqual([
         SEED_TEAM_NOC_ID,
         SEED_TEAM_PLANTAO_COSI_ID,
         SEED_TEAM_SOC_ID,
       ].sort());
+    });
+  });
+
+  it('does not create a default dev session without an explicit identity', async () => {
+    await withServer({}, async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/api/auth/dev-session`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      const body = await response.json() as { ok: boolean; error: { code: string } };
+
+      expect(response.status).toBe(400);
+      expect(body.ok).toBe(false);
+      expect(body.error.code).toBe('DEV_SESSION_IDENTITY_REQUIRED');
     });
   });
 

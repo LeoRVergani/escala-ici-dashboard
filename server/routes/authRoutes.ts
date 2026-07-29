@@ -3,14 +3,14 @@ import { Router } from 'express';
 import { z } from 'zod';
 import type { AppConfig } from '../config/env.js';
 import { AppError } from '../domain/appError.js';
-import { DEV_USERS } from '../domain/organizationSeed.js';
+import { DEV_USERS, createSimulationUser } from '../domain/organizationSeed.js';
 import { clearSessionCookie, createSession, destroySession, setSessionCookie } from '../application/sessionStore.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { validateBody } from '../middleware/validateRequest.js';
 import { sendOk } from '../app/responses.js';
 
 const devSessionSchema = z.object({
-  login: z.enum(['claudio', 'lvergani']).default('claudio'),
+  login: z.enum(['claudio', 'lvergani']).optional(),
   displayName: z.string().trim().min(1).max(80).optional(),
 });
 
@@ -27,10 +27,14 @@ export function createAuthRoutes(config: AppConfig) {
       return;
     }
 
-    const baseUser = DEV_USERS[req.body.login];
+    if (!req.body.displayName && !req.body.login) {
+      next(new AppError('DEV_SESSION_IDENTITY_REQUIRED', 'Informe o nome da simulação.', 400));
+      return;
+    }
+
     const user = req.body.displayName
-      ? { ...baseUser, displayName: req.body.displayName }
-      : baseUser;
+      ? createSimulationUser(req.body.displayName)
+      : DEV_USERS[req.body.login!];
     const token = createSession(user);
     setSessionCookie(res, token);
     sendOk(res, { user });

@@ -27,18 +27,12 @@ export class HttpAuthGateway implements AuthGateway {
   }
 
   async signIn(): Promise<AuthUser> {
-    const user = toAuthUser(
-      await this.apiClient.post<IdentityResponse>('/api/auth/dev-session', { login: 'claudio' }),
-    );
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    return user;
+    throw new Error('Informe um nome para iniciar a simulação local.');
   }
 
   async signInAs(user: AuthUser): Promise<AuthUser> {
-    const login = user.login === 'claudio' ? 'claudio' : 'lvergani';
     const signedIn = toAuthUser(
       await this.apiClient.post<IdentityResponse>('/api/auth/dev-session', {
-        login,
         displayName: user.name,
       }),
     );

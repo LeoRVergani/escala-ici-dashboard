@@ -21,6 +21,17 @@ function MicrosoftMark() {
   );
 }
 
+function createSimulationLogin(name: string): string {
+  return (
+    name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '.')
+      .replace(/^\.+|\.+$/g, '') || `simulacao-${Date.now()}`
+  );
+}
+
 export function LoginAccessPanel() {
   const { signIn, switchDevUser } = useAuth();
   const { show } = useToast();
@@ -38,10 +49,11 @@ export function LoginAccessPanel() {
     setSigningIn(true);
     try {
       if (switchDevUser) {
+        const login = createSimulationLogin(normalizedSimulationName);
         await switchDevUser({
-          id: 'dev-lvergani',
+          id: `dev-simulation-${login}`,
           name: normalizedSimulationName,
-          login: 'lvergani',
+          login,
         });
       } else {
         await signIn();

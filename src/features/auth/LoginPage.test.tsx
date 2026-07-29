@@ -93,6 +93,8 @@ describe('LoginPage (checkpoint 1A — reprodução da tela Órbita)', () => {
 
     await waitFor(() => expect(window.location.pathname).toBe('/organizacoes'));
     expect(sessionStorage.getItem('escala-ici:dev-session')).toContain('Leo Teste');
+    expect(sessionStorage.getItem('escala-ici:dev-session')).not.toContain('lvergani');
+    expect(sessionStorage.getItem('escala-ici:dev-session')).not.toContain('claudio');
   });
 
   it('reaches every interactive control via keyboard alone', async () => {
