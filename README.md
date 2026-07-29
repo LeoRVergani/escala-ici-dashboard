@@ -33,11 +33,19 @@ npm run typecheck
 npm run test
 npm run build
 npm run build:api
+npm run seed:firebase-spark -- --dry-run
+npm run seed:firebase-spark
 npm run smoke:api
 npm run test:e2e
 ```
 
 ## Firebase
+
+Base Spark preparada em `firebase.json`, `firestore.rules` e `firestore.indexes.json`.
+
+O seed `npm run seed:firebase-spark` usa somente o Firebase Web SDK, carrega variaveis `VITE_FIREBASE_*` do ambiente ou `.env`, autentica com `SEED_FIREBASE_EMAIL`/`SEED_FIREBASE_PASSWORD`, cria `config/app`, `equipes/EQ_SOC`, os `tiposTurno` do contrato e 9 documentos em `usuarios`. Para teste, `lvergani` fica salvo como usuario ativo com `permissoes: ["ADMIN", "DEVELOPER"]` e `nivelHierarquico: 4`.
+
+Para o primeiro uso em projeto vazio, crie a conta Auth do `lvergani` e rode o seed autenticado nela; as regras permitem apenas esse bootstrap do proprio documento admin/dev. Em producao, alinhe os IDs dos documentos `usuarios/{uid}` aos UIDs reais do Firebase Auth/Microsoft antes de publicar escalas.
 
 Nunca coloque service account dentro de `src`, `public` ou Git. Use `GOOGLE_APPLICATION_CREDENTIALS` apontando para um caminho absoluto fora do repositório.
 

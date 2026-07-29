@@ -2,8 +2,9 @@
  * @vitest-environment node
  */
 import { describe, expect, it } from 'vitest';
+import { idDocumento } from '../src/documentos';
 import { calcularTotais } from '../src/totais';
-import { formatarMinutos, montarChaveDia } from '../src/normalizar';
+import { formatarMinutos, montarChaveDia, normalizarCelula } from '../src/normalizar';
 import { CATALOGO_SOC } from './catalogo';
 import type { Dia } from '../src/tipos';
 
@@ -15,6 +16,16 @@ describe('normalizar e totais', () => {
 
   it('monta chave ISO do dia em UTC', () => {
     expect(montarChaveDia(new Date(Date.UTC(2026, 7, 25)))).toBe('2026-08-25');
+  });
+
+  it('normaliza valores de celula para comparacao de aliases', () => {
+    expect(normalizarCelula(' férias ')).toBe('FERIAS');
+    expect(normalizarCelula('D S R')).toBe('DSR');
+  });
+
+  it('monta id deterministico de documento Firestore', () => {
+    expect(idDocumento('EQ_SOC', 'u5', '2026-08')).toBe('EQ_SOC_u5_2026-08');
+    expect(() => idDocumento('EQ/SOC', 'u5', '2026-08')).toThrow('equipeId');
   });
 
   it('calcula totais sempre do zero e de forma idempotente', () => {

@@ -1,0 +1,66 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+    }
+
+    function isGestor() {
+      return signedIn()
+        && userDoc().data.ativo == true
+        && userDoc().data.nivelHierarquico <= 5;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isLverganiBootstrap(uid) {
+      return isOwner(uid)
+        && !exists(/databases/$(database)/documents/usuarios/$(uid))
+        && request.resource.data.login == 'lvergani'
+        && request.resource.data.ativo == true
+        && request.resource.data.nivelHierarquico <= 5
+        && request.resource.data.permissoes.hasAll(['ADMIN', 'DEVELOPER']);
+    }
+
+    match /config/{doc} {
+      allow read: if signedIn();
+      allow write: if isGestor();
+    }
+
+    match /equipes/{id} {
+      allow read: if signedIn();
+      allow write: if isGestor();
+    }
+
+    match /tiposTurno/{id} {
+      allow read: if signedIn();
+      allow write: if isGestor();
+    }
+
+    match /usuarios/{uid} {
+      allow read: if signedIn() && (isOwner(uid) || isGestor());
+      allow create: if isGestor() || isLverganiBootstrap(uid);
+      allow update: if isGestor();
+      allow delete: if false;
+    }
+
+    match /turnosMes/{id} {
+      allow read: if signedIn()
+        && (resource.data.usuarioUid == request.auth.uid || isGestor());
+      allow create, update: if isGestor();
+      allow delete: if false;
+    }
+
+    match /importacoes/{id} {
+      allow read, create: if isGestor();
+      allow update, delete: if false;
+    }
+  }
+}

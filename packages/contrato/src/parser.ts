@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { normalizarTexto, montarChaveDia } from './normalizar';
+import { normalizarCelula, normalizarTexto, montarChaveDia } from './normalizar';
 import { calcularTotais } from './totais';
 import {
   SCHEMA_VERSION,
@@ -137,8 +137,8 @@ function resolverTurno(texto: string): TurnoPlanilha | null {
 function montarAliases(catalogo: Record<string, TipoTurno>): Map<string, TipoTurno> {
   const aliases = new Map<string, TipoTurno>();
   for (const turno of Object.values(catalogo)) {
-    aliases.set(normalizarTexto(turno.codigo), turno);
-    for (const alias of turno.aliasesXLS) aliases.set(normalizarTexto(alias), turno);
+    aliases.set(normalizarCelula(turno.codigo), turno);
+    for (const alias of turno.aliasesXLS) aliases.set(normalizarCelula(alias), turno);
   }
   return aliases;
 }
@@ -184,7 +184,7 @@ function parseValorDia(input: {
     return montarDiaTrabalho(turnoPadrao, valor);
   }
 
-  const textoNormalizado = normalizarTexto(valor).replace(/\s+/g, '');
+  const textoNormalizado = normalizarCelula(valor);
   const alias = aliases.get(textoNormalizado);
   if (alias) return montarDiaCatalogo(alias);
 

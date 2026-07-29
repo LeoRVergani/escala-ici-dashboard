@@ -7,6 +7,10 @@ export function normalizarTexto(v: unknown): string {
     .toUpperCase();
 }
 
+export function normalizarCelula(v: unknown): string {
+  return normalizarTexto(v).replace(/\s+/g, '');
+}
+
 export function montarChaveDia(d: Date): string {
   const ano = d.getUTCFullYear();
   const mes = String(d.getUTCMonth() + 1).padStart(2, '0');

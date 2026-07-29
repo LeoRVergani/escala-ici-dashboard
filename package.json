@@ -19,12 +19,14 @@
     "test:e2e": "playwright test",
     "smoke:api": "tsx server/smoke.ts",
     "firebase:emulators": "firebase emulators:start --only firestore",
+    "seed:firebase-spark": "tsx seed/firebaseSparkSeed.ts",
     "seed:dev": "tsx server/seed/devSeed.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "firebase": "^12.16.0",
     "firebase-admin": "^14.2.0",
     "jose": "^6.2.4",
     "lucide-react": "^1.27.0",
