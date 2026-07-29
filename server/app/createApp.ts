@@ -10,6 +10,8 @@ import { notFoundMiddleware } from '../middleware/notFound.js';
 import { attachSession } from '../middleware/requireAuth.js';
 import { requestIdMiddleware } from '../middleware/requestId.js';
 import { createAuthRoutes } from '../routes/authRoutes.js';
+import { createAdminRoutes } from '../routes/adminRoutes.js';
+import { createChangeRequestRoutes } from '../routes/changeRequestRoutes.js';
 import { createDraftRoutes } from '../routes/draftRoutes.js';
 import { createImportRoutes } from '../routes/importRoutes.js';
 import { createOrganizationRoutes } from '../routes/organizationRoutes.js';
@@ -51,6 +53,8 @@ export function createApp({ config, packageInfo, logger }: CreateAppOptions) {
   );
   app.use(express.json({ limit: '1mb' }));
   app.use('/api/auth', createAuthRoutes(config));
+  app.use('/api', createAdminRoutes());
+  app.use('/api', createChangeRequestRoutes());
   app.use('/api', createOrganizationRoutes());
   app.use('/api', createDraftRoutes());
   app.use('/api', createImportRoutes(config));
