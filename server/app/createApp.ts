@@ -10,6 +10,7 @@ import { notFoundMiddleware } from '../middleware/notFound.js';
 import { attachSession } from '../middleware/requireAuth.js';
 import { requestIdMiddleware } from '../middleware/requestId.js';
 import { createAuthRoutes } from '../routes/authRoutes.js';
+import { createImportRoutes } from '../routes/importRoutes.js';
 import { createOrganizationRoutes } from '../routes/organizationRoutes.js';
 import { createSystemRoutes } from '../routes/systemRoutes.js';
 
@@ -47,6 +48,7 @@ export function createApp({ config, packageInfo, logger }: CreateAppOptions) {
   app.use(express.json({ limit: '1mb' }));
   app.use('/api/auth', createAuthRoutes(config));
   app.use('/api', createOrganizationRoutes());
+  app.use('/api', createImportRoutes(config));
   app.use('/api', createSystemRoutes(config, packageInfo));
   app.use(notFoundMiddleware);
   app.use(errorHandler);

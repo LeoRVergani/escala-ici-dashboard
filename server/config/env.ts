@@ -25,6 +25,7 @@ export const envSchema = z.object({
   ALLOW_OFFICIAL_FIRESTORE_WRITE: booleanFromEnv.default(false),
   DEV_AUTH_ENABLED: booleanFromEnv.default(true),
   LOG_LEVEL: z.string().default('info'),
+  IMPORT_MAX_FILE_SIZE_BYTES: z.coerce.number().int().positive().default(10 * 1024 * 1024),
   MSAL_TENANT_ID: z.string().optional().default(''),
   MSAL_CLIENT_ID: z.string().optional().default(''),
   MSAL_AUDIENCE: z.string().optional().default(''),

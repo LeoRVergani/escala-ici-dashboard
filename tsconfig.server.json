@@ -3,18 +3,24 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.server.tsbuildinfo",
     "target": "es2023",
     "lib": ["ES2023"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "ignoreDeprecations": "6.0",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "types": ["node"],
     "skipLibCheck": true,
     "strict": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "rootDir": ".",
     "outDir": "dist-api",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["server/**/*.ts"]
+  "include": ["server/**/*.ts", "src/lib/parser/**/*.ts", "src/domain/schedule.ts"],
+  "exclude": ["server/tests/**/*.ts", "src/lib/parser/**/*.test.ts"]
 }
