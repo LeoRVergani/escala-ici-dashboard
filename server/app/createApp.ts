@@ -13,6 +13,7 @@ import { createAuthRoutes } from '../routes/authRoutes.js';
 import { createDraftRoutes } from '../routes/draftRoutes.js';
 import { createImportRoutes } from '../routes/importRoutes.js';
 import { createOrganizationRoutes } from '../routes/organizationRoutes.js';
+import { createPublicationRoutes } from '../routes/publicationRoutes.js';
 import { createSystemRoutes } from '../routes/systemRoutes.js';
 import { createValidationRoutes } from '../routes/validationRoutes.js';
 
@@ -53,6 +54,7 @@ export function createApp({ config, packageInfo, logger }: CreateAppOptions) {
   app.use('/api', createDraftRoutes());
   app.use('/api', createImportRoutes(config));
   app.use('/api', createValidationRoutes());
+  app.use('/api', createPublicationRoutes(config));
   app.use('/api', createSystemRoutes(config, packageInfo));
   app.use(notFoundMiddleware);
   app.use(errorHandler);
