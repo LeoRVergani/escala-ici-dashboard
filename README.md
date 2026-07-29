@@ -1,32 +1,54 @@
-# React + TypeScript + Vite
+# Dashboard Escala ICI
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Dashboard profissional para gestão de escalas ICI com React, TypeScript, Vite, backend Express e contrato preparado para publicação revisionada compatível com o app KMP.
 
-Currently, two official plugins are available:
+## Estado Atual
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Frontend Órbita dark-only.
+- Backend Express modular em `server/`.
+- Login de desenvolvimento e RBAC por equipe.
+- Preview XLS/XLSX em memória, sem persistir arquivo bruto.
+- Draft/autosave via API.
+- Validação 6x1/descanso/plantão no backend.
+- Publicação revisionada com flag oficial desligada por padrão.
+- Leitura ativa, histórico, exportação XLSX, trocas, admin, auditoria e outbox em MVP local.
 
-## React Compiler
+## Setup Local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+copy .env.example .env
+npm run dev:api
+npm run dev:web
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Frontend: `http://localhost:5173`
+
+API: `http://127.0.0.1:3001/api/health`
+
+## Scripts
+
+```bash
+npm run typecheck
+npm run test
+npm run build
+npm run build:api
+npm run smoke:api
+npm run test:e2e
+```
+
+## Firebase
+
+Nunca coloque service account dentro de `src`, `public` ou Git. Use `GOOGLE_APPLICATION_CREDENTIALS` apontando para um caminho absoluto fora do repositório.
+
+`ALLOW_OFFICIAL_FIRESTORE_WRITE=false` é o padrão obrigatório. A publicação real controlada só deve ocorrer após autorização explícita.
+
+## Documentação
+
+- `docs/RUNBOOK-LOCAL.md`
+- `docs/RUNBOOK-FIREBASE-DEV.md`
+- `docs/RUNBOOK-PUBLICATION.md`
+- `docs/TROUBLESHOOTING.md`
+- `docs/SECURITY-MVP.md`
+- `docs/RELEASE-CHECKLIST.md`
+- `docs/spec/04-MVP-FIREBASE-KMP-CONTRACT.md`
