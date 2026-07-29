@@ -30,7 +30,7 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
         return {
           authGateway: new HttpAuthGateway(apiClient),
           organizationRepository: new HttpOrganizationRepository(apiClient),
-          scheduleRepository: new HttpScheduleRepository(),
+          scheduleRepository: new HttpScheduleRepository(apiClient),
           apiClient,
         };
       }
