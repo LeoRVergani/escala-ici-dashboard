@@ -24,9 +24,13 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
     () => {
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
       const useLocalAdapters = import.meta.env.VITE_USE_LOCAL_ADAPTERS !== 'false';
-      const apiClient = apiBaseUrl ? new HttpApiClient({ baseUrl: apiBaseUrl }) : null;
+      const shouldUseHttpAdapters = !useLocalAdapters;
+      const apiClient =
+        apiBaseUrl || shouldUseHttpAdapters
+          ? new HttpApiClient({ baseUrl: apiBaseUrl ?? '' })
+          : null;
 
-      if (apiClient && !useLocalAdapters) {
+      if (apiClient && shouldUseHttpAdapters) {
         return {
           authGateway: new HttpAuthGateway(apiClient),
           organizationRepository: new HttpOrganizationRepository(apiClient),
